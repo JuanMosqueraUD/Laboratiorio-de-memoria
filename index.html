@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Memoria - Sistema Operativo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Simulador de Memoria - Particiones Estáticas</h1>
+            <p>Sistema de 16 MiB (0x000000 - 0xFFFFFF) con particiones de 1 MiB</p>
+        </header>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="memory-visualization">
+                    <h2>Memoria Principal</h2>
+                    <div class="memory-container" id="memoryContainer">
+                        <!-- Las particiones se generarán dinámicamente -->
+                    </div>
+                    <div class="memory-info">
+                        <div class="legend">
+                            <div class="legend-item">
+                                <span class="color-box free"></span>
+                                <span>Libre</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="color-box occupied"></span>
+                                <span>Ocupada</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="process-control">
+                    <h2>Control de Procesos</h2>
+                    <div class="process-list" id="processList">
+                        <!-- Los procesos se generarán dinámicamente -->
+                    </div>
+                </div>
+
+                <div class="system-info">
+                    <h2>Información del Sistema</h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">Memoria Total:</span>
+                            <span class="value">16 MiB</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Particiones:</span>
+                            <span class="value">16 × 1 MiB</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Memoria Libre:</span>
+                            <span class="value" id="freeMemory">16 MiB</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Memoria Ocupada:</span>
+                            <span class="value" id="usedMemory">0 MiB</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+</html>
