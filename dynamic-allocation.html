@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asignación Dinámica - Simulador de Memoria</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Simulador de Memoria - Asignación Dinámica</h1>
+            <p>Memoria de 16 MiB con asignación dinámica y compactación opcional</p>
+        </header>
+
+        <!-- Navegación -->
+        <nav class="view-navigation">
+            <a href="index.html" class="nav-btn">Inicio</a>
+            <a href="static-fixed.html" class="nav-btn">Particiones Estáticas Fijas</a>
+            <a href="static-variable.html" class="nav-btn">Particiones Estáticas Variables</a>
+            <a href="dynamic-allocation.html" class="nav-btn active">Asignación Dinámica</a>
+        </nav>
+
+        <div class="view-container">
+            <div class="view-header">
+                <h2>Asignación Dinámica con Algoritmo "Mejor Ajuste"</h2>
+                <div class="controls-group">
+                    <label for="compactionToggle">Modo de Operación:</label>
+                    <select id="compactionToggle" class="control-input">
+                        <option value="best-fit">Sin Compactación (Mejor Ajuste)</option>
+                        <option value="compaction">Con Compactación</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="main-content-dynamic">
+                <div class="memory-visualization-dynamic">
+                    <h2>Memoria Principal (16 MiB)</h2>
+                    <div class="memory-bar-container" id="memoryBarContainer">
+                        <!-- La barra de memoria se generará dinámicamente -->
+                    </div>
+                    <div class="legend">
+                        <div class="legend-item"><span class="color-box os"></span> Sistema Operativo</div>
+                        <div class="legend-item"><span class="color-box occupied-dynamic"></span> Proceso Ocupado</div>
+                        <div class="legend-item"><span class="color-box free-dynamic"></span> Espacio Libre</div>
+                    </div>
+                </div>
+
+                <div class="simulation-controls">
+                    <h2>Control de Simulación</h2>
+                    <div class="process-form">
+                        <h3>Añadir Proceso</h3>
+                        <div class="form-group">
+                            <label for="processSize">Tamaño del Proceso (KB):</label>
+                            <input type="number" id="processSize" class="control-input" min="1" placeholder="Ej: 512">
+                        </div>
+                        <button id="addProcessBtn" class="btn start">Añadir Proceso</button>
+                    </div>
+                    <div class="process-table-container">
+                        <h3>Tabla de Procesos y Memoria</h3>
+                        <table id="processTable">
+                            <thead>
+                                <tr>
+                                    <th>Proceso</th>
+                                    <th>Tamaño (KB)</th>
+                                    <th>Dirección Base</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Filas de procesos se añadirán aquí -->
+                            </tbody>
+                        </table>
+                    </div>
+                     <div class="system-info">
+                        <h3>Información del Sistema</h3>
+                        <div class="info-grid-dynamic">
+                            <div class="info-item">
+                                <span class="label">Memoria Libre Total:</span>
+                                <span class="value" id="totalFreeMemory">-- KB</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Fragmentación Externa:</span>
+                                <span class="value" id="fragmentation">-- KB</span>
+                            </div>
+                             <div class="info-item">
+                                <span class="label">Bloque Libre Más Grande:</span>
+                                <span class="value" id="largestFreeBlock">-- KB</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="resetSimulationBtn" class="btn reset">Reiniciar Simulación</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="dynamic-allocation.js"></script>
+</body>
+</html>

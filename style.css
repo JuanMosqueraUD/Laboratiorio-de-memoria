@@ -528,7 +528,124 @@ header p {
     left: 0;
 }
 
-/* Responsive */
+/* Estilos para Asignación Dinámica */
+.main-content-dynamic {
+    display: flex;
+    gap: 20px;
+}
+
+.memory-visualization-dynamic {
+    flex: 3;
+    background: white;
+    border-radius: 5px;
+    padding: 20px;
+    border: 1px solid #ddd;
+}
+
+.memory-bar-container {
+    display: flex;
+    height: 60px;
+    background: #f0f0f0;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+}
+
+.memory-block {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: width 0.5s ease-in-out;
+}
+
+.color-box.os, .memory-block.os {
+    background: #6c757d; /* Gris oscuro para SO */
+    border-color: #343a40;
+}
+
+.color-box.occupied-dynamic, .memory-block.occupied-dynamic {
+    background: #28a745; /* Verde para procesos */
+    border-color: #1e7e34;
+}
+
+.color-box.free-dynamic, .memory-block.free-dynamic {
+    background: #e9ecef; /* Gris claro para libre */
+    border-color: #ced4da;
+    color: #333;
+}
+
+.simulation-controls {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.process-form, .process-table-container, .system-info {
+    background: white;
+    border-radius: 5px;
+    padding: 15px;
+    border: 1px solid #ddd;
+}
+
+.process-form h3, .process-table-container h3, .system-info h3 {
+    color: #333;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.control-input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    width: 100%;
+}
+
+#processTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+#processTable th, #processTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+#processTable th {
+    background-color: #f2f2f2;
+}
+
+.info-grid-dynamic {
+    display: grid;
+    gap: 8px;
+}
+
+.controls-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
 @media (max-width: 768px) {
     .main-content {
         flex-direction: column;
@@ -565,5 +682,9 @@ header p {
     .simulation-options {
         grid-template-columns: 1fr;
         gap: 20px;
+    }
+    
+    .main-content-dynamic {
+        flex-direction: column;
     }
 }

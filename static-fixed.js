@@ -66,9 +66,16 @@ class StaticFixedMemorySimulator {
     }
 
     init() {
+
         // Crear particiones fijas
         for (let i = 0; i < NUM_PARTITIONS; i++) {
-            this.partitions.push(new MemoryPartition(i));
+            const partition = new MemoryPartition(i);
+            // Reservar P0 para el sistema operativo
+            if (i === 0) {
+                partition.isOccupied = true;
+                partition.process = { name: 'Sistema Operativo', size: 1024, isRunning: true, segments: ['Núcleo', 'Drivers', 'Servicios'] };
+            }
+            this.partitions.push(partition);
         }
 
         // Crear procesos predeterminados
@@ -157,13 +164,12 @@ class StaticFixedMemorySimulator {
             return false;
         }
         
-        const freePartition = this.partitions.find(p => !p.isOccupied);
-        
+        // Buscar una partición libre que no sea P0
+        const freePartition = this.partitions.find(p => !p.isOccupied && p.id !== 0);
         if (!freePartition) {
-            alert('No hay particiones libres disponibles');
+            alert('No hay particiones libres disponibles (P0 está reservada para el sistema operativo)');
             return false;
         }
-
         freePartition.allocate(process);
         process.partition = freePartition;
         return true;
@@ -198,11 +204,11 @@ class StaticFixedMemorySimulator {
     }
 
     updateStats() {
-        const occupied = this.partitions.filter(p => p.isOccupied).length;
-        const free = NUM_PARTITIONS - occupied;
-        
-        this.freeMemory.textContent = `${free} MiB`;
-        this.usedMemory.textContent = `${occupied} MiB`;
+    // P0 siempre ocupada por el SO
+    const occupied = this.partitions.filter(p => p.isOccupied).length;
+    const free = NUM_PARTITIONS - occupied;
+    this.freeMemory.textContent = `${free} MiB`;
+    this.usedMemory.textContent = `${occupied} MiB`;
     }
 
     showPartitionInfo(partition) {
@@ -233,6 +239,10 @@ class StaticFixedMemorySimulator {
                 process.partition = null;
             }
         });
+        // Volver a reservar P0 para el SO tras reiniciar
+        const p0 = this.partitions[0];
+        p0.isOccupied = true;
+        p0.process = { name: 'Sistema Operativo', size: 1024, isRunning: true, segments: ['Núcleo', 'Drivers', 'Servicios'] };
         this.updateDisplay();
     }
 }
