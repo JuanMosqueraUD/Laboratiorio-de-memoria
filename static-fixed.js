@@ -1,9 +1,9 @@
-// Simulador de Memoria Simple
+// Simulador de Particiones Estáticas Fijas
 const MEMORY_SIZE = 16; // 16 MiB
 const PARTITION_SIZE = 1; // 1 MiB
 const NUM_PARTITIONS = 16;
 
-// Partición de memoria
+// Partición de memoria fija
 class MemoryPartition {
     constructor(id) {
         this.id = id;
@@ -11,6 +11,7 @@ class MemoryPartition {
         this.endAddress = this.startAddress + 0xFFFFFF;
         this.isOccupied = false;
         this.process = null;
+        this.size = 1024; // KB
     }
 
     allocate(process) {
@@ -35,29 +36,29 @@ class Process {
         this.name = name;
         this.size = size; // KB
         this.segments = segments;
-        this.status = 'ready'; // ready, running, stopped
+        this.isRunning = false;
         this.partition = null;
     }
 
     start() {
-        if (this.status === 'ready' && this.partition) {
-            this.status = 'running';
+        if (!this.isRunning && this.partition) {
+            this.isRunning = true;
             return true;
         }
         return false;
     }
 
     stop() {
-        if (this.status === 'running') {
-            this.status = 'stopped';
+        if (this.isRunning) {
+            this.isRunning = false;
             return true;
         }
         return false;
     }
 }
 
-// Simulador principal
-class MemorySimulator {
+// Simulador principal de particiones fijas
+class StaticFixedMemorySimulator {
     constructor() {
         this.partitions = [];
         this.processes = [];
@@ -65,7 +66,7 @@ class MemorySimulator {
     }
 
     init() {
-        // Crear particiones
+        // Crear particiones fijas
         for (let i = 0; i < NUM_PARTITIONS; i++) {
             this.partitions.push(new MemoryPartition(i));
         }
@@ -76,12 +77,12 @@ class MemorySimulator {
             new Process(2, "Navegador Web", 800, ["Motor JS: 300KB", "Renderizado: 250KB", "Cache: 150KB"]),
             new Process(3, "Base de Datos", 600, ["Engine: 200KB", "Índices: 150KB", "Buffer: 200KB"]),
             new Process(4, "Compilador", 400, ["Parser: 120KB", "Optimizador: 150KB", "Generador: 100KB"]),
-            new Process(5, "Sistema Gráfico", 900, ["Drivers: 200KB", "OpenGL: 300KB", "Texturas: 250KB"])
+            new Process(5, "Sistema Gráfico", 900, ["Drivers: 200KB", "OpenGL: 300KB", "Texturas: 250KB"]),
+            new Process(6, "Servidor Grande", 1500, ["Sistema: 500KB", "Cache: 600KB", "Buffers: 400KB"])
         ];
 
         this.setupUI();
         this.updateDisplay();
-        this.autoAssignProcesses();
     }
 
     setupUI() {
@@ -122,7 +123,9 @@ class MemorySimulator {
             div.innerHTML = `
                 <div class="process-header">
                     <div class="process-name">${process.name}</div>
-                    <div class="process-status ${process.status}">${this.getStatusText(process.status)}</div>
+                    <div class="process-status ${process.isRunning ? 'running' : 'stopped'}">
+                        ${process.isRunning ? 'EJECUTANDO' : 'DETENIDO'}
+                    </div>
                 </div>
                 <div class="process-details">
                     <div><strong>Tamaño:</strong> ${process.size} KB</div>
@@ -131,11 +134,11 @@ class MemorySimulator {
                 </div>
                 <div class="process-controls">
                     <button class="btn start" onclick="simulator.startProcess(${process.id})" 
-                            ${process.status === 'running' || !process.partition ? 'disabled' : ''}>
+                            ${process.isRunning ? 'disabled' : ''}>
                         Iniciar
                     </button>
                     <button class="btn stop" onclick="simulator.stopProcess(${process.id})"
-                            ${process.status !== 'running' ? 'disabled' : ''}>
+                            ${!process.isRunning ? 'disabled' : ''}>
                         Detener
                     </button>
                 </div>
@@ -144,33 +147,34 @@ class MemorySimulator {
         });
     }
 
-    getStatusText(status) {
-        const texts = {
-            'ready': 'LISTO',
-            'running': 'EJECUTANDO', 
-            'stopped': 'DETENIDO'
-        };
-        return texts[status];
-    }
-
     allocateProcess(processId) {
         const process = this.processes.find(p => p.id === processId);
+        if (!process) return false;
+
+        // Verificar si el proceso es demasiado grande SOLO al intentar asignarlo
+        if (process.size > 1024) {
+            alert(`Error: El proceso "${process.name}" (${process.size} KB) es demasiado grande para las particiones disponibles (máximo 1024 KB)`);
+            return false;
+        }
+        
         const freePartition = this.partitions.find(p => !p.isOccupied);
         
-        if (process && freePartition && process.size <= 1024) {
-            freePartition.allocate(process);
-            process.partition = freePartition;
-            return true;
+        if (!freePartition) {
+            alert('No hay particiones libres disponibles');
+            return false;
         }
-        return false;
+
+        freePartition.allocate(process);
+        process.partition = freePartition;
+        return true;
     }
 
     startProcess(processId) {
         const process = this.processes.find(p => p.id === processId);
         
+        // Si el proceso no tiene partición asignada, intentar asignar una
         if (!process.partition) {
             if (!this.allocateProcess(processId)) {
-                alert('No hay memoria disponible');
                 return;
             }
         }
@@ -184,6 +188,11 @@ class MemorySimulator {
         const process = this.processes.find(p => p.id === processId);
         
         if (process && process.stop()) {
+            // Liberar la partición cuando se detiene el proceso
+            if (process.partition) {
+                process.partition.deallocate();
+                process.partition = null;
+            }
             this.updateDisplay();
         }
     }
@@ -199,30 +208,37 @@ class MemorySimulator {
     showPartitionInfo(partition) {
         let info = `Partición ${partition.id}\n`;
         info += `Dirección: ${partition.getAddressHex()}\n`;
+        info += `Tamaño: ${partition.size} KB\n`;
         info += `Estado: ${partition.isOccupied ? 'Ocupada' : 'Libre'}\n`;
         
         if (partition.process) {
             info += `\nProceso: ${partition.process.name}\n`;
-            info += `Tamaño: ${partition.process.size} KB\n`;
-            info += `Estado: ${this.getStatusText(partition.process.status)}\n`;
+            info += `Tamaño del Proceso: ${partition.process.size} KB\n`;
+            info += `Fragmentación Interna: ${partition.size - partition.process.size} KB\n`;
+            info += `Estado: ${partition.process.isRunning ? 'EJECUTANDO' : 'DETENIDO'}\n`;
             info += `Segmentos:\n${partition.process.segments.map(s => `  • ${s}`).join('\n')}`;
         }
         
         alert(info);
     }
 
-    autoAssignProcesses() {
-        // Asignar algunos procesos automáticamente
-        setTimeout(() => {
-            this.allocateProcess(1);
-            this.allocateProcess(3);
-            this.updateDisplay();
-        }, 500);
+    reset() {
+        // Detener todos los procesos y liberar particiones
+        this.processes.forEach(process => {
+            if (process.isRunning) {
+                process.stop();
+            }
+            if (process.partition) {
+                process.partition.deallocate();
+                process.partition = null;
+            }
+        });
+        this.updateDisplay();
     }
 }
 
 // Inicializar
 let simulator;
 document.addEventListener('DOMContentLoaded', () => {
-    simulator = new MemorySimulator();
+    simulator = new StaticFixedMemorySimulator();
 });

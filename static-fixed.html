@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Particiones Estáticas Fijas - Simulador de Memoria</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Simulador de Memoria - Particiones Estáticas Fijas</h1>
+            <p>Sistema de 16 MiB con 16 particiones fijas de 1 MiB cada una</p>
+        </header>
+
+        <!-- Navegación -->
+        <nav class="view-navigation">
+            <a href="index.html" class="nav-btn">Inicio</a>
+            <a href="static-fixed.html" class="nav-btn active">Particiones Estáticas Fijas</a>
+            <a href="static-variable.html" class="nav-btn">Particiones Estáticas Variables</a>
+        </nav>
+
+        <div class="view-container">
+            <div class="view-header">
+                <h2>Particiones Estáticas Fijas</h2>
+                <p>16 particiones de tamaño fijo de 1 MiB (1024 KB) cada una</p>
+            </div>
+
+            <div class="main-content">
+                <div class="left-panel">
+                    <div class="memory-visualization">
+                        <h2>Memoria Principal</h2>
+                        <div class="memory-container" id="memoryContainer">
+                            <!-- Las particiones se generarán dinámicamente -->
+                        </div>
+                        <div class="memory-info">
+                            <div class="legend">
+                                <div class="legend-item">
+                                    <span class="color-box free"></span>
+                                    <span>Libre</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="color-box occupied"></span>
+                                    <span>Ocupada</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right-panel">
+                    <div class="process-control">
+                        <h2>Control de Procesos</h2>
+                        <div class="control-buttons">
+                            <button class="btn reset" onclick="simulator.reset()">Reiniciar Sistema</button>
+                        </div>
+                        <div class="process-list" id="processList">
+                            <!-- Los procesos se generarán dinámicamente -->
+                        </div>
+                    </div>
+
+                    <div class="system-info">
+                        <h2>Información del Sistema</h2>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="label">Memoria Total:</span>
+                                <span class="value">16 MiB</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Particiones:</span>
+                                <span class="value">16 × 1 MiB</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Tipo:</span>
+                                <span class="value">Estáticas Fijas</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Memoria Libre:</span>
+                                <span class="value" id="freeMemory">16 MiB</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Memoria Ocupada:</span>
+                                <span class="value" id="usedMemory">0 MiB</span>
+                            </div>
+                        </div>
+                        <div class="system-notes">
+                            <h3>Características:</h3>
+                            <ul>
+                                <li>Particiones de <strong>tamaño fijo</strong> (1024 KB)</li>
+                                <li>Asignación <strong>completa</strong> de la partición al proceso</li>
+                                <li>Procesos > 1024 KB <strong>no pueden ejecutarse</strong></li>
+                                <li>Puede generar <strong>fragmentación interna</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="static-fixed.js"></script>
+</body>
+</html>

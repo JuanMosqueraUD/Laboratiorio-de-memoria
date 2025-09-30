@@ -36,6 +36,62 @@ header p {
     font-size: 1rem;
 }
 
+/* Navegación entre vistas */
+.view-navigation {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    gap: 10px;
+}
+
+.nav-btn {
+    padding: 12px 24px;
+    border: 2px solid #4a90e2;
+    background: white;
+    color: #4a90e2;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+    background: #e8f0fe;
+}
+
+.nav-btn.active {
+    background: #4a90e2;
+    color: white;
+}
+
+/* Contenedores de vistas */
+.view-container {
+    display: block;
+}
+
+.view-container.hidden {
+    display: none;
+}
+
+.view-header {
+    text-align: center;
+    margin-bottom: 20px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 4px solid #4a90e2;
+}
+
+.view-header h2 {
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.view-header p {
+    color: #666;
+    font-size: 0.9rem;
+}
+
 .main-content {
     display: flex;
     gap: 20px;
@@ -67,6 +123,143 @@ header p {
     background: #f9f9f9;
     border-radius: 5px;
     border: 1px solid #ccc;
+}
+
+/* Contenedor para particiones variables - mejorado */
+.memory-container-variable {
+    display: flex;
+    flex-direction: column;
+    height: 550px; /* Aumentado de 450px a 550px */
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    position: relative;
+    overflow-y: auto;
+}
+
+.variable-partition {
+    border: 2px solid #999;
+    border-radius: 3px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-bottom: 3px; /* Aumentado de 2px a 3px para más espaciado */
+    min-height: 60px; /* Aumentado de 40px a 60px */
+    position: relative;
+    flex-shrink: 0;
+}
+
+/* Algoritmo de selección */
+.algorithm-selection {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.algorithm-selection h3 {
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 1rem;
+}
+
+.algorithm-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.algorithm-btn {
+    padding: 8px 16px;
+    border: 2px solid #4a90e2;
+    background: white;
+    color: #4a90e2;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.algorithm-btn:hover {
+    background: #e8f0fe;
+}
+
+.algorithm-btn.active {
+    background: #4a90e2;
+    color: white;
+}
+
+.algorithm-info {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+/* Colores mejorados para particiones */
+.variable-partition.reserved {
+    background: #e3f2fd;
+    border-color: #2196f3;
+}
+
+.color-box.reserved {
+    background: #e3f2fd;
+    border: 1px solid #2196f3;
+}
+
+.variable-partition.free {
+    background: #e8f5e8;
+    border-color: #4caf50;
+}
+
+.variable-partition.occupied {
+    background: #ffe8e8;
+    border-color: #f44336;
+}
+
+.variable-partition.reserved {
+    background: #e8f5ff;
+    border-color: #2196f3;
+    opacity: 0.8;
+}
+
+.variable-partition:hover {
+    opacity: 0.8;
+}
+
+.partition-size-label {
+    font-size: 0.7rem;
+    font-weight: bold;
+    position: absolute;
+    top: 2px;
+    right: 5px;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 1px 3px;
+    border-radius: 2px;
+}
+
+.partition-id {
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.partition-name {
+    font-size: 0.7rem;
+    font-style: italic;
+    color: #666;
+}
+
+.partition-free {
+    font-size: 0.7rem;
+    color: #4caf50;
+    font-weight: bold;
 }
 
 .partition {
@@ -170,10 +363,16 @@ header p {
 }
 
 .process-item {
-    background: #f9f9f9;
     border: 1px solid #ddd;
     border-radius: 5px;
     padding: 10px;
+    margin-bottom: 10px;
+    background: white;
+}
+
+.process-item.too-large {
+    border-color: #f44336;
+    background: #fff5f5;
 }
 
 .process-header {
@@ -280,6 +479,55 @@ header p {
     font-family: monospace;
 }
 
+/* Botones de control */
+.control-buttons {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.btn.reset {
+    background: #ff9800;
+    color: white;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+}
+
+/* Notas del sistema */
+.system-notes {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f0f8ff;
+    border-radius: 5px;
+    border-left: 4px solid #4a90e2;
+}
+
+.system-notes h3 {
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 1rem;
+}
+
+.system-notes ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.system-notes li {
+    margin-bottom: 8px;
+    padding-left: 15px;
+    position: relative;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.system-notes li:before {
+    content: "•";
+    color: #4a90e2;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .main-content {
@@ -292,7 +540,30 @@ header p {
         height: 300px;
     }
     
+    .memory-container-variable {
+        height: 400px; /* Ajustado para móviles pero aún más grande que antes */
+    }
+    
+    .algorithm-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .algorithm-btn {
+        width: 200px;
+        margin-bottom: 5px;
+    }
+    
     header h1 {
         font-size: 1.5rem;
+    }
+    
+    .option-card {
+        padding: 20px;
+    }
+    
+    .simulation-options {
+        grid-template-columns: 1fr;
+        gap: 20px;
     }
 }

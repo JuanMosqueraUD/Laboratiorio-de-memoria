@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Particiones Estáticas Variables - Simulador de Memoria</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Simulador de Memoria - Particiones Estáticas Variables</h1>
+            <p>Sistema de 16 MiB con particiones de tamaños predefinidos</p>
+        </header>
+
+        <!-- Navegación -->
+        <nav class="view-navigation">
+            <a href="index.html" class="nav-btn">Inicio</a>
+            <a href="static-fixed.html" class="nav-btn">Particiones Estáticas Fijas</a>
+            <a href="static-variable.html" class="nav-btn active">Particiones Estáticas Variables</a>
+        </nav>
+
+        <div class="view-container">
+            <div class="view-header">
+                <h2>Particiones Estáticas Variables</h2>
+                <p>Particiones de tamaños predefinidos: 512 KB, 1024 KB, 2048 KB, 4096 KB</p>
+            </div>
+
+            <div class="algorithm-selection">
+                <h3>Algoritmo de Asignación:</h3>
+                <div class="algorithm-buttons">
+                    <button class="algorithm-btn active" data-algorithm="best" onclick="simulator.setAlgorithm('best')">
+                        Mejor Ajuste (Best Fit)
+                    </button>
+                    <button class="algorithm-btn" data-algorithm="first" onclick="simulator.setAlgorithm('first')">
+                        Primer Ajuste (First Fit)
+                    </button>
+                    <button class="algorithm-btn" data-algorithm="worst" onclick="simulator.setAlgorithm('worst')">
+                        Peor Ajuste (Worst Fit)
+                    </button>
+                </div>
+            </div>
+
+            <div class="main-content">
+                                <div class="left-panel">
+                    <div class="memory-visualization">
+                        <h2>Memoria Principal</h2>
+                        <div class="memory-container-variable" id="memoryContainer">
+                            <!-- Las particiones variables se generarán dinámicamente -->
+                        </div>
+                        <div class="memory-info">
+                            <div class="algorithm-info">
+                                <span>Algoritmo: <strong id="currentAlgorithm">Mejor Ajuste</strong></span>
+                            </div>
+                            <div class="legend">
+                                <div class="legend-item">
+                                    <span class="color-box reserved"></span>
+                                    <span>Reservada</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="color-box free"></span>
+                                    <span>Libre</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="color-box occupied"></span>
+                                    <span>Ocupada</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right-panel">
+                    <div class="process-control">
+                        <h2>Control de Procesos</h2>
+                        <div class="control-buttons">
+                            <button class="btn reset" onclick="simulator.reset()">Reiniciar Sistema</button>
+                        </div>
+                        <div class="process-list" id="processList">
+                            <!-- Los procesos se generarán dinámicamente -->
+                        </div>
+                    </div>
+
+                    <div class="system-info">
+                        <h2>Información del Sistema</h2>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="label">Memoria Total:</span>
+                                <span class="value">16 MiB</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Particiones:</span>
+                                <span class="value">Tamaños Variables</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Tipo:</span>
+                                <span class="value">Estáticas Variables</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Memoria Libre:</span>
+                                <span class="value" id="freeMemory">16 MiB</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Memoria Ocupada:</span>
+                                <span class="value" id="usedMemory">0 MiB</span>
+                            </div>
+                        </div>
+                        <div class="system-notes">
+                            <h3>Características:</h3>
+                            <ul>
+                                <li>Particiones de <strong>tamaños predefinidos</strong></li>
+                                <li>Algoritmo seleccionable para asignación</li>
+                                <li>Sistema Operativo reserva 1024 KB</li>
+                                <li>Fragmentación interna <strong>reducida</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="static-variable.js"></script>
+</body>
+</html>
