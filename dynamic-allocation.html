@@ -33,48 +33,64 @@
                 </div>
             </div>
 
-            <div class="main-content-dynamic">
-                <div class="memory-visualization-dynamic">
-                    <h2>Memoria Principal (16 MiB)</h2>
-                    <div class="memory-bar-container" id="memoryBarContainer">
-                        <!-- La barra de memoria se generará dinámicamente -->
-                    </div>
-                    <div class="legend">
-                        <div class="legend-item"><span class="color-box os"></span> Sistema Operativo</div>
-                        <div class="legend-item"><span class="color-box occupied-dynamic"></span> Proceso Ocupado</div>
-                        <div class="legend-item"><span class="color-box free-dynamic"></span> Espacio Libre</div>
+            <div class="simulation-content">
+                <div class="left-panel">
+                    <div class="memory-visualization">
+                        <h2>Memoria Principal (16 MiB)</h2>
+                        <div class="memory-bar-container" id="memoryBarContainer">
+                            <!-- La barra de memoria se generará dinámicamente -->
+                        </div>
+                        <div class="legend">
+                            <div class="legend-item">
+                                <span class="color-box os"></span>
+                                <span>Sistema Operativo</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="color-box occupied-dynamic"></span>
+                                <span>Proceso Ocupado</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="color-box free-dynamic"></span>
+                                <span>Espacio Libre</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="simulation-controls">
-                    <h2>Control de Simulación</h2>
-                    <div class="process-form">
-                        <h3>Añadir Proceso</h3>
-                        <div class="form-group">
-                            <label for="processSize">Tamaño del Proceso (KB):</label>
-                            <input type="number" id="processSize" class="control-input" min="1" placeholder="Ej: 512">
+                <div class="right-panel">
+                    <div class="process-control">
+                        <h2>Control de Procesos</h2>
+                        <div class="control-buttons">
+                            <button class="btn reset" id="resetSimulationBtn">Reiniciar Sistema</button>
                         </div>
-                        <button id="addProcessBtn" class="btn start">Añadir Proceso</button>
+                        <div class="process-form">
+                            <h3>Crear Proceso Personalizado</h3>
+                            <div class="form-group">
+                                <label for="processName">Nombre del Proceso:</label>
+                                <input type="text" id="processName" class="control-input" placeholder="Ej: Mi Aplicación">
+                            </div>
+                            <div class="form-group">
+                                <label for="processSize">Tamaño (KB):</label>
+                                <input type="number" id="processSize" class="control-input" min="1" placeholder="Ej: 512">
+                            </div>
+                            <button id="addProcessBtn" class="btn start">Crear Proceso</button>
+                        </div>
+                        <div class="process-list" id="processList">
+                            <!-- Los procesos se generarán dinámicamente -->
+                        </div>
                     </div>
-                    <div class="process-table-container">
-                        <h3>Tabla de Procesos y Memoria</h3>
-                        <table id="processTable">
-                            <thead>
-                                <tr>
-                                    <th>Proceso</th>
-                                    <th>Tamaño (KB)</th>
-                                    <th>Dirección Base</th>
-                                    <th>Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Filas de procesos se añadirán aquí -->
-                            </tbody>
-                        </table>
-                    </div>
-                     <div class="system-info">
-                        <h3>Información del Sistema</h3>
-                        <div class="info-grid-dynamic">
+
+                    <div class="system-info">
+                        <h2>Información del Sistema</h2>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="label">Memoria Total:</span>
+                                <span class="value">16 MiB</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Tipo:</span>
+                                <span class="value">Asignación Dinámica</span>
+                            </div>
                             <div class="info-item">
                                 <span class="label">Memoria Libre Total:</span>
                                 <span class="value" id="totalFreeMemory">-- KB</span>
@@ -83,13 +99,21 @@
                                 <span class="label">Fragmentación Externa:</span>
                                 <span class="value" id="fragmentation">-- KB</span>
                             </div>
-                             <div class="info-item">
+                            <div class="info-item">
                                 <span class="label">Bloque Libre Más Grande:</span>
                                 <span class="value" id="largestFreeBlock">-- KB</span>
                             </div>
                         </div>
+                        <div class="system-notes">
+                            <h3>Características:</h3>
+                            <ul>
+                                <li>Asignación <strong>exacta</strong> del tamaño solicitado</li>
+                                <li>Algoritmo <strong>Mejor Ajuste</strong> (Best Fit)</li>
+                                <li>Compactación opcional para <strong>reducir fragmentación</strong></li>
+                                <li>Sin límite de tamaño por proceso</li>
+                            </ul>
+                        </div>
                     </div>
-                    <button id="resetSimulationBtn" class="btn reset">Reiniciar Simulación</button>
                 </div>
             </div>
         </div>

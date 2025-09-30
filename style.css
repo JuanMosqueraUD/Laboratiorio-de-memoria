@@ -492,6 +492,36 @@ header p {
     font-size: 0.8rem;
 }
 
+.btn.predefined {
+    background: #9c27b0;
+    color: white;
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    margin: 2px;
+}
+
+/* Contenedor de procesos predeterminados */
+.predefined-processes {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+}
+
+.predefined-processes h3 {
+    margin-bottom: 10px;
+    color: #495057;
+    font-size: 1rem;
+}
+
+.predefined-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: flex-start;
+}
+
 /* Notas del sistema */
 .system-notes {
     margin-top: 15px;
@@ -529,6 +559,11 @@ header p {
 }
 
 /* Estilos para Asignación Dinámica */
+.simulation-content {
+    display: flex;
+    gap: 20px;
+}
+
 .main-content-dynamic {
     display: flex;
     gap: 20px;
@@ -540,6 +575,59 @@ header p {
     border-radius: 5px;
     padding: 20px;
     border: 1px solid #ddd;
+}
+
+/* Panel derecho para asignación dinámica */
+.right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.process-control {
+    background: white;
+    border-radius: 5px;
+    padding: 20px;
+    border: 1px solid #ddd;
+}
+
+.process-control h2 {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.process-form {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+}
+
+.process-form h3 {
+    margin-bottom: 10px;
+    color: #495057;
+    font-size: 1rem;
+}
+
+.form-group {
+    margin-bottom: 10px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.control-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 0.9rem;
 }
 
 .memory-bar-container {
