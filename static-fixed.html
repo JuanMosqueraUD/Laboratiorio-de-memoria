@@ -18,6 +18,7 @@
             <a href="index.html" class="nav-btn">Inicio</a>
             <a href="static-fixed.html" class="nav-btn active">Particiones Estáticas Fijas</a>
             <a href="static-variable.html" class="nav-btn">Particiones Estáticas Variables</a>
+            <a href="dynamic-allocation.html" class="nav-btn">Particiones Dinámicas</a>
         </nav>
 
         <div class="view-container">
@@ -54,6 +55,22 @@
                         <div class="control-buttons">
                             <button class="btn reset" onclick="simulator.reset()">Reiniciar Sistema</button>
                         </div>
+                        
+                        <div class="add-process-section">
+                            <div class="process-form">
+                                <h3>Crear Proceso Personalizado</h3>
+                                <div class="form-group">
+                                    <label for="processName">Nombre del Proceso:</label>
+                                    <input type="text" id="processName" class="control-input" placeholder="Ej: Mi Aplicación">
+                                </div>
+                                <div class="form-group">
+                                    <label for="processSize">Tamaño (KB):</label>
+                                    <input type="number" id="processSize" class="control-input" min="1" placeholder="Ej: 512">
+                                </div>
+                                <button id="addProcessBtn" class="btn start">Crear Proceso</button>
+                            </div>
+                        </div>
+                        
                         <div class="process-list" id="processList">
                             <!-- Los procesos se generarán dinámicamente -->
                         </div>

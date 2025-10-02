@@ -630,6 +630,14 @@ header p {
     font-size: 0.9rem;
 }
 
+.add-process-section {
+    margin-bottom: 20px;
+}
+
+.add-process-section .process-form {
+    margin-bottom: 0;
+}
+
 .memory-bar-container {
     display: flex;
     height: 60px;

@@ -62,6 +62,7 @@ class StaticFixedMemorySimulator {
     constructor() {
         this.partitions = [];
         this.processes = [];
+        this.nextProcessId = 7; // Comenzar después de los procesos predeterminados
         this.init();
     }
 
@@ -97,6 +98,16 @@ class StaticFixedMemorySimulator {
         this.processList = document.getElementById('processList');
         this.freeMemory = document.getElementById('freeMemory');
         this.usedMemory = document.getElementById('usedMemory');
+        
+        // Elementos para crear procesos personalizados
+        this.processNameInput = document.getElementById('processName');
+        this.processSizeInput = document.getElementById('processSize');
+        this.addProcessBtn = document.getElementById('addProcessBtn');
+        
+        // Event listener para crear procesos
+        if (this.addProcessBtn) {
+            this.addProcessBtn.addEventListener('click', () => this.createCustomProcess());
+        }
     }
 
     updateDisplay() {
@@ -228,6 +239,28 @@ class StaticFixedMemorySimulator {
         alert(info);
     }
 
+    createCustomProcess() {
+        const name = this.processNameInput.value.trim();
+        const size = parseInt(this.processSizeInput.value, 10);
+        
+        if (!name) {
+            alert('Por favor, introduce un nombre para el proceso.');
+            return;
+        }
+        
+        if (isNaN(size) || size <= 0) {
+            alert('Por favor, introduce un tamaño de proceso válido en KB.');
+            return;
+        }
+
+        const newProcess = new Process(this.nextProcessId++, name, size, [`Tamaño total: ${size}KB`]);
+        this.processes.push(newProcess);
+
+        this.processNameInput.value = '';
+        this.processSizeInput.value = '';
+        this.updateDisplay();
+    }
+
     reset() {
         // Detener todos los procesos y liberar particiones
         this.processes.forEach(process => {
@@ -239,6 +272,18 @@ class StaticFixedMemorySimulator {
                 process.partition = null;
             }
         });
+        
+        // Resetear a solo los procesos predeterminados
+        this.processes = [
+            new Process(1, "Editor de Texto", 512, ["Código: 256KB", "Datos: 128KB", "Buffer: 128KB"]),
+            new Process(2, "Navegador Web", 800, ["Motor JS: 300KB", "Renderizado: 250KB", "Cache: 150KB"]),
+            new Process(3, "Base de Datos", 600, ["Engine: 200KB", "Índices: 150KB", "Buffer: 200KB"]),
+            new Process(4, "Compilador", 400, ["Parser: 120KB", "Optimizador: 150KB", "Generador: 100KB"]),
+            new Process(5, "Sistema Gráfico", 900, ["Drivers: 200KB", "OpenGL: 300KB", "Texturas: 250KB"]),
+            new Process(6, "Servidor Grande", 1500, ["Sistema: 500KB", "Cache: 600KB", "Buffers: 400KB"])
+        ];
+        this.nextProcessId = 7;
+        
         // Volver a reservar P0 para el SO tras reiniciar
         const p0 = this.partitions[0];
         p0.isOccupied = true;
