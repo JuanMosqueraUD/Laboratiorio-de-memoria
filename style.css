@@ -638,6 +638,41 @@ header p {
     margin-bottom: 0;
 }
 
+.memory-info-section {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.memory-constants h3 {
+    margin: 0 0 0.5rem 0;
+    color: #495057;
+    font-size: 1rem;
+}
+
+.memory-detail {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.memory-detail:last-child {
+    border-bottom: none;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.process-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+}
+
 .memory-bar-container {
     display: flex;
     height: 60px;

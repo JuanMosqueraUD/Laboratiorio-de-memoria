@@ -1,5 +1,8 @@
 // Simulador de Particiones Estáticas Variables
-// Basado en la tabla: SO=1024KB, y particiones de 512KB, 1024KB, 2048KB, 4096KB
+// Basado en la tabla: SO=1024KiB, y particiones de 512KiB, 1024KiB, 2048KiB, 4096KiB
+
+const HEAP_SIZE = 128; // 128 KiB
+const STACK_SIZE = 64; // 64 KiB
 
 // Configuración según la tabla de la imagen
 const PREDEFINED_PARTITIONS = [
@@ -51,10 +54,13 @@ class VariablePartition {
 
 // Proceso (misma clase que antes)
 class Process {
-    constructor(id, name, size, segments) {
+    constructor(id, name, baseSize, segments) {
         this.id = id;
         this.name = name;
-        this.size = size; // KB
+        this.baseSize = baseSize; // KiB - tamaño base del programa
+        this.heapSize = HEAP_SIZE; // KiB
+        this.stackSize = STACK_SIZE; // KiB
+        this.size = baseSize + HEAP_SIZE + STACK_SIZE; // Tamaño total en KiB
         this.segments = segments;
         this.isRunning = false;
         this.partition = null;
@@ -75,6 +81,15 @@ class Process {
         }
         return false;
     }
+
+    getMemoryBreakdown() {
+        return {
+            base: this.baseSize,
+            heap: this.heapSize,
+            stack: this.stackSize,
+            total: this.size
+        };
+    }
 }
 
 // Simulador de particiones estáticas variables
@@ -93,14 +108,14 @@ class StaticVariableMemorySimulator {
 
         // Crear procesos predeterminados
         this.processes = [
-            new Process(1, "Editor de Texto", 512, ["Código: 256KB", "Datos: 128KB", "Buffer: 128KB"]),
-            new Process(2, "Navegador Web", 800, ["Motor JS: 300KB", "Renderizado: 250KB", "Cache: 150KB"]),
-            new Process(3, "Base de Datos", 600, ["Engine: 200KB", "Índices: 150KB", "Buffer: 200KB"]),
-            new Process(4, "Compilador", 400, ["Parser: 120KB", "Optimizador: 150KB", "Generador: 100KB"]),
-            new Process(5, "Sistema Gráfico", 900, ["Drivers: 200KB", "OpenGL: 300KB", "Texturas: 250KB"]),
-            new Process(6, "Servidor Grande", 1500, ["Sistema: 500KB", "Cache: 600KB", "Buffers: 400KB"]),
-            new Process(7, "Sistema Masivo", 3500, ["Kernel: 1000KB", "Drivers: 1500KB", "Buffers: 1000KB"]),
-            new Process(8, "Aplicación Enorme", 5000, ["Framework: 2000KB", "Datos: 2000KB", "Cache: 1000KB"])
+            new Process(1, "Editor de Texto", 320, ["Código: 160 KiB", "Datos: 80 KiB", "Buffer: 80 KiB"]),
+            new Process(2, "Navegador Web", 608, ["Motor JS: 240 KiB", "Renderizado: 200 KiB", "Cache: 168 KiB"]),
+            new Process(3, "Base de Datos", 408, ["Engine: 136 KiB", "Índices: 136 KiB", "Buffer: 136 KiB"]),
+            new Process(4, "Compilador", 208, ["Parser: 70 KiB", "Optimizador: 68 KiB", "Generador: 70 KiB"]),
+            new Process(5, "Sistema Gráfico", 708, ["Drivers: 236 KiB", "OpenGL: 236 KiB", "Texturas: 236 KiB"]),
+            new Process(6, "Servidor Grande", 1308, ["Sistema: 436 KiB", "Cache: 436 KiB", "Buffers: 436 KiB"]),
+            new Process(7, "Sistema Masivo", 3508, ["Kernel: 1169 KiB", "Drivers: 1169 KiB", "Buffers: 1170 KiB"]),
+            new Process(8, "Aplicación Enorme", 3908, ["Framework: 1302 KiB", "Datos: 1303 KiB", "Cache: 1303 KiB"])
         ];
 
         this.setupUI();
@@ -122,6 +137,32 @@ class StaticVariableMemorySimulator {
         // Event listener para crear procesos
         if (this.addProcessBtn) {
             this.addProcessBtn.addEventListener('click', () => this.createCustomProcess());
+        }
+
+        // Mostrar información de heap y stack
+        this.displayMemoryInfo();
+    }
+
+    displayMemoryInfo() {
+        const memoryInfoEl = document.getElementById('memoryInfo');
+        if (memoryInfoEl) {
+            memoryInfoEl.innerHTML = `
+                <div class="memory-constants">
+                    <h3>Configuración de Memoria</h3>
+                    <div class="memory-detail">
+                        <span><strong>Heap por proceso:</strong></span>
+                        <span>${HEAP_SIZE} KiB</span>
+                    </div>
+                    <div class="memory-detail">
+                        <span><strong>Stack por proceso:</strong></span>
+                        <span>${STACK_SIZE} KiB</span>
+                    </div>
+                    <div class="memory-detail">
+                        <span><strong>Overhead total por proceso:</strong></span>
+                        <span>${HEAP_SIZE + STACK_SIZE} KiB</span>
+                    </div>
+                </div>
+            `;
         }
     }
 

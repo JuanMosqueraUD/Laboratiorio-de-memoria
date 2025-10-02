@@ -86,8 +86,9 @@
                                     <input type="text" id="processName" class="control-input" placeholder="Ej: Mi Aplicación">
                                 </div>
                                 <div class="form-group">
-                                    <label for="processSize">Tamaño (KB):</label>
-                                    <input type="number" id="processSize" class="control-input" min="1" placeholder="Ej: 512">
+                                    <label for="processSize">Tamaño base (KiB):</label>
+                                    <input type="number" id="processSize" class="control-input" min="1" max="3908" placeholder="Ej: 1000">
+                                    <small>Máximo 3908 KiB (se añadirán 192 KiB de heap+stack automáticamente)</small>
                                 </div>
                                 <button id="addProcessBtn" class="btn start">Crear Proceso</button>
                             </div>
@@ -122,6 +123,11 @@
                                 <span class="value" id="usedMemory">0 MiB</span>
                             </div>
                         </div>
+                        
+                        <div id="memoryInfo" class="memory-info-section">
+                            <!-- La información de heap y stack se insertará aquí -->
+                        </div>
+                        
                         <div class="system-notes">
                             <h3>Características:</h3>
                             <ul>
