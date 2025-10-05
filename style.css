@@ -7,8 +7,8 @@
 
 body {
     font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
-    color: #333;
+    background-color: #ecf0f1;
+    color: #2c3e50;
     line-height: 1.4;
 }
 
@@ -21,7 +21,7 @@ body {
 header {
     text-align: center;
     margin-bottom: 20px;
-    background: #4a90e2;
+    background: #e67e22;
     color: white;
     padding: 20px;
     border-radius: 5px;
@@ -46,21 +46,17 @@ header p {
 
 .nav-btn {
     padding: 12px 24px;
-    border: 2px solid #4a90e2;
+    border: 2px solid #3498db;
     background: white;
-    color: #4a90e2;
+    color: #3498db;
+    text-decoration: none;
     border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: all 0.3s ease;
+    transition: all 0.3s;
 }
 
-.nav-btn:hover {
-    background: #e8f0fe;
-}
-
+.nav-btn:hover,
 .nav-btn.active {
-    background: #4a90e2;
+    background: #3498db;
     color: white;
 }
 
@@ -76,19 +72,19 @@ header p {
 .view-header {
     text-align: center;
     margin-bottom: 20px;
-    background: #f8f9fa;
+    background: #f39c12;
     padding: 15px;
     border-radius: 5px;
-    border-left: 4px solid #4a90e2;
+    border-left: 4px solid #e67e22;
 }
 
 .view-header h2 {
-    color: #333;
+    color: white;
     margin-bottom: 5px;
 }
 
 .view-header p {
-    color: #666;
+    color: rgba(255,255,255,0.9);
     font-size: 0.9rem;
 }
 
@@ -103,11 +99,11 @@ header p {
     background: white;
     border-radius: 5px;
     padding: 20px;
-    border: 1px solid #ddd;
+    border: 1px solid #bdc3c7;
 }
 
 .memory-visualization h2 {
-    color: #333;
+    color: #2c3e50;
     margin-bottom: 15px;
     text-align: center;
 }
@@ -120,9 +116,9 @@ header p {
     height: 400px;
     margin-bottom: 15px;
     padding: 15px;
-    background: #f9f9f9;
+    background: #ecf0f1;
     border-radius: 5px;
-    border: 1px solid #ccc;
+    border: 1px solid #bdc3c7;
 }
 
 /* Contenedor para particiones variables - mejorado */
@@ -132,9 +128,9 @@ header p {
     height: 550px; /* Aumentado de 450px a 550px */
     margin-bottom: 15px;
     padding: 10px;
-    background: #f9f9f9;
+    background: #ecf0f1;
     border-radius: 5px;
-    border: 1px solid #ccc;
+    border: 1px solid #bdc3c7;
     position: relative;
     overflow-y: auto;
 }
@@ -263,7 +259,7 @@ header p {
 }
 
 .partition {
-    border: 2px solid #999;
+    border: 2px solid #bdc3c7;
     border-radius: 3px;
     display: flex;
     flex-direction: column;
@@ -274,13 +270,13 @@ header p {
 }
 
 .partition.free {
-    background: #e8f5e8;
-    border-color: #4caf50;
+    background: #d5f4e6;
+    border-color: #27ae60;
 }
 
 .partition.occupied {
-    background: #ffe8e8;
-    border-color: #f44336;
+    background: #fadbd8;
+    border-color: #e74c3c;
 }
 
 .partition:hover {
@@ -320,17 +316,17 @@ header p {
     width: 15px;
     height: 15px;
     border-radius: 2px;
-    border: 1px solid #999;
+    border: 1px solid #bdc3c7;
 }
 
 .color-box.free {
-    background: #e8f5e8;
-    border-color: #4caf50;
+    background: #d5f4e6;
+    border-color: #27ae60;
 }
 
 .color-box.occupied {
-    background: #ffe8e8;
-    border-color: #f44336;
+    background: #fadbd8;
+    border-color: #e74c3c;
 }
 
 /* Panel derecho - Procesos */
@@ -345,11 +341,11 @@ header p {
     background: white;
     border-radius: 5px;
     padding: 15px;
-    border: 1px solid #ddd;
+    border: 1px solid #bdc3c7;
 }
 
 .process-control h2, .system-info h2 {
-    color: #333;
+    color: #2c3e50;
     margin-bottom: 15px;
     text-align: center;
 }
@@ -401,13 +397,13 @@ header p {
 }
 
 .process-status.running {
-    background: #cce7ff;
-    color: #004085;
+    background: #d6eaf8;
+    color: #1b4f72;
 }
 
 .process-status.stopped {
-    background: #f8d7da;
-    color: #721c24;
+    background: #fadbd8;
+    color: #922b21;
 }
 
 .process-details {
@@ -415,7 +411,7 @@ header p {
     grid-template-columns: 1fr 1fr;
     gap: 5px;
     font-size: 0.8rem;
-    color: #666;
+    color: #5d6d7e;
     margin-bottom: 8px;
 }
 
@@ -435,12 +431,12 @@ header p {
 }
 
 .btn.start {
-    background: #4caf50;
+    background: #27ae60;
     color: white;
 }
 
 .btn.stop {
-    background: #f44336;
+    background: #e74c3c;
     color: white;
 }
 
@@ -486,14 +482,14 @@ header p {
 }
 
 .btn.reset {
-    background: #ff9800;
+    background: #e67e22;
     color: white;
     padding: 8px 16px;
     font-size: 0.8rem;
 }
 
 .btn.predefined {
-    background: #9c27b0;
+    background: #3498db;
     color: white;
     padding: 8px 12px;
     font-size: 0.75rem;
@@ -625,9 +621,10 @@ header p {
 .control-input {
     width: 100%;
     padding: 8px;
-    border: 1px solid #ddd;
+    border: 1px solid #bdc3c7;
     border-radius: 3px;
     font-size: 0.9rem;
+    color: #2c3e50;
 }
 
 .add-process-section {
@@ -699,19 +696,19 @@ header p {
 }
 
 .color-box.os, .memory-block.os {
-    background: #6c757d; /* Gris oscuro para SO */
-    border-color: #343a40;
+    background: #e67e22; /* Naranja para SO */
+    border-color: #d35400;
 }
 
 .color-box.occupied-dynamic, .memory-block.occupied-dynamic {
-    background: #28a745; /* Verde para procesos */
-    border-color: #1e7e34;
+    background: #3498db; /* Azul para procesos */
+    border-color: #2980b9;
 }
 
 .color-box.free-dynamic, .memory-block.free-dynamic {
-    background: #e9ecef; /* Gris claro para libre */
-    border-color: #ced4da;
-    color: #333;
+    background: #ecf0f1; /* Gris claro para libre */
+    border-color: #bdc3c7;
+    color: #2c3e50;
 }
 
 .simulation-controls {
