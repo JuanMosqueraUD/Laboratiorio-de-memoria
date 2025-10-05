@@ -70,9 +70,9 @@
                                 <input type="text" id="processName" class="control-input" placeholder="Ej: Mi Aplicación">
                             </div>
                             <div class="form-group">
-                                <label for="processSize">Tamaño Base (KB):</label>
+                                <label for="processSize">Tamaño Base (KiB):</label>
                                 <input type="number" id="processSize" class="control-input" min="1" placeholder="Ej: 512">
-                                <small>El tamaño total incluirá 192 KB adicionales (128 KB heap + 64 KB stack)</small>
+                                <small>El tamaño total incluirá 192 KiB adicionales (128 KiB heap + 64 KiB stack)</small>
                             </div>
                             <button id="addProcessBtn" class="btn start">Crear Proceso</button>
                         </div>
@@ -94,15 +94,15 @@
                             </div>
                             <div class="info-item">
                                 <span class="label">Memoria Libre Total:</span>
-                                <span class="value" id="totalFreeMemory">-- KB</span>
+                                <span class="value" id="totalFreeMemory">-- KiB</span>
                             </div>
                             <div class="info-item">
                                 <span class="label">Fragmentación Externa:</span>
-                                <span class="value" id="fragmentation">-- KB</span>
+                                <span class="value" id="fragmentation">-- KiB</span>
                             </div>
                             <div class="info-item">
                                 <span class="label">Bloque Libre Más Grande:</span>
-                                <span class="value" id="largestFreeBlock">-- KB</span>
+                                <span class="value" id="largestFreeBlock">-- KiB</span>
                             </div>
                         </div>
                         <div class="system-notes">

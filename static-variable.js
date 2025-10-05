@@ -21,7 +21,7 @@ const PREDEFINED_PARTITIONS = [
 class VariablePartition {
     constructor(config) {
         this.id = config.id;
-        this.size = config.size; // KB
+        this.size = config.size; // KiB
         this.baseAddress = parseInt(config.baseHex, 16);
         this.isOccupied = false;
         this.process = null;
@@ -215,7 +215,7 @@ class StaticVariableMemorySimulator {
             div.style.minHeight = '60px';  // Aumentado de 45px a 60px
             
             div.innerHTML = `
-                <div class="partition-size-label">${partition.size} KB</div>
+                <div class="partition-size-label">${partition.size} KiB</div>
                 <div class="partition-id">${partition.id === 'SO' ? 'SO' : `P${partition.id}`}</div>
                 <div class="partition-address">${partition.getAddressHex()}</div>
                 ${partition.reserved ? 
@@ -245,9 +245,9 @@ class StaticVariableMemorySimulator {
                     </div>
                 </div>
                 <div class="process-details">
-                    <div><strong>Tamaño:</strong> ${process.size} KB</div>
+                    <div><strong>Tamaño:</strong> ${process.size} KiB</div>
                     <div><strong>Partición:</strong> ${process.partition ? 
-                        `${process.partition.id === 'SO' ? 'SO' : `P${process.partition.id}`} (${process.partition.size}KB)` : 
+                        `${process.partition.id === 'SO' ? 'SO' : `P${process.partition.id}`} (${process.partition.size}KiB)` : 
                         'Ninguna'}</div>
                     <div style="grid-column: span 2"><strong>Segmentos:</strong> ${process.segments.join(', ')}</div>
                 </div>
@@ -305,7 +305,7 @@ class StaticVariableMemorySimulator {
                 'worst': 'Peor Ajuste'
             };
             
-            alert(`Error (${algorithmNames[this.currentAlgorithm]}): No hay particiones disponibles para "${process.name}" (${process.size} KB)\n\nParticiones libres:\n${this.getAvailablePartitionsInfo()}`);
+            alert(`Error (${algorithmNames[this.currentAlgorithm]}): No hay particiones disponibles para "${process.name}" (${process.size} KiB)\n\nParticiones libres:\n${this.getAvailablePartitionsInfo()}`);
             return false;
         }
 
@@ -319,7 +319,7 @@ class StaticVariableMemorySimulator {
         if (available.length === 0) {
             return "• Ninguna partición libre";
         }
-        return available.map(p => `• P${p.id}: ${p.size} KB`).join('\n');
+        return available.map(p => `• P${p.id}: ${p.size} KiB`).join('\n');
     }
 
     startProcess(processId) {
@@ -366,7 +366,7 @@ class StaticVariableMemorySimulator {
     showPartitionInfo(partition) {
         let info = `${partition.id === 'SO' ? 'Sistema Operativo' : `Partición ${partition.id}`}\n`;
         info += `Dirección: ${partition.getAddressHex()}\n`;
-        info += `Tamaño: ${partition.size} KB\n`;
+        info += `Tamaño: ${partition.size} KiB\n`;
         
         if (partition.reserved) {
             info += `Estado: Reservada para ${partition.name}\n`;
@@ -375,8 +375,8 @@ class StaticVariableMemorySimulator {
             
             if (partition.process) {
                 info += `\nProceso: ${partition.process.name}\n`;
-                info += `Tamaño del Proceso: ${partition.process.size} KB\n`;
-                info += `Fragmentación Interna: ${partition.size - partition.process.size} KB\n`;
+                info += `Tamaño del Proceso: ${partition.process.size} KiB\n`;
+                info += `Fragmentación Interna: ${partition.size - partition.process.size} KiB\n`;
                 info += `Eficiencia: ${((partition.process.size / partition.size) * 100).toFixed(1)}%\n`;
                 info += `Estado: ${partition.process.isRunning ? 'EJECUTANDO' : 'DETENIDO'}\n`;
                 info += `Segmentos:\n${partition.process.segments.map(s => `  • ${s}`).join('\n')}`;
@@ -396,11 +396,11 @@ class StaticVariableMemorySimulator {
         }
         
         if (isNaN(size) || size <= 0) {
-            alert('Por favor, introduce un tamaño de proceso válido en KB.');
+            alert('Por favor, introduce un tamaño de proceso válido en KiB.');
             return;
         }
 
-        const newProcess = new Process(this.nextProcessId++, name, size, [`Tamaño total: ${size}KB`]);
+        const newProcess = new Process(this.nextProcessId++, name, size, [`Tamaño total: ${size}KiB`]);
         this.processes.push(newProcess);
 
         this.processNameInput.value = '';
@@ -422,14 +422,14 @@ class StaticVariableMemorySimulator {
         
         // Resetear a solo los procesos predeterminados
         this.processes = [
-            new Process(1, "Editor de Texto", 512, ["Código: 256KB", "Datos: 128KB", "Buffer: 128KB"]),
-            new Process(2, "Navegador Web", 800, ["Motor JS: 300KB", "Renderizado: 250KB", "Cache: 150KB"]),
-            new Process(3, "Base de Datos", 600, ["Engine: 200KB", "Índices: 150KB", "Buffer: 200KB"]),
-            new Process(4, "Compilador", 400, ["Parser: 120KB", "Optimizador: 150KB", "Generador: 100KB"]),
-            new Process(5, "Sistema Gráfico", 900, ["Drivers: 200KB", "OpenGL: 300KB", "Texturas: 250KB"]),
-            new Process(6, "Servidor Grande", 1500, ["Sistema: 500KB", "Cache: 600KB", "Buffers: 400KB"]),
-            new Process(7, "Sistema Masivo", 3500, ["Kernel: 1000KB", "Drivers: 1500KB", "Buffers: 1000KB"]),
-            new Process(8, "Aplicación Enorme", 5000, ["Framework: 2000KB", "Datos: 2000KB", "Cache: 1000KB"])
+            new Process(1, "Editor de Texto", 512, ["Código: 256KiB", "Datos: 128KiB", "Buffer: 128KiB"]),
+            new Process(2, "Navegador Web", 800, ["Motor JS: 300KiB", "Renderizado: 250KiB", "Cache: 150KiB"]),
+            new Process(3, "Base de Datos", 600, ["Engine: 200KiB", "Índices: 150KiB", "Buffer: 200KiB"]),
+            new Process(4, "Compilador", 400, ["Parser: 120KiB", "Optimizador: 150KiB", "Generador: 100KiB"]),
+            new Process(5, "Sistema Gráfico", 900, ["Drivers: 200KiB", "OpenGL: 300KiB", "Texturas: 250KiB"]),
+            new Process(6, "Servidor Grande", 1500, ["Sistema: 500KiB", "Cache: 600KiB", "Buffers: 400KiB"]),
+            new Process(7, "Sistema Masivo", 3500, ["Kernel: 1000KiB", "Drivers: 1500KiB", "Buffers: 1000KiB"]),
+            new Process(8, "Aplicación Enorme", 5000, ["Framework: 2000KiB", "Datos: 2000KiB", "Cache: 1000KiB"])
         ];
         this.nextProcessId = 9;
         

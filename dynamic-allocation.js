@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const TOTAL_MEMORY = 16 * 1024; // 16384 KB
-    const OS_MEMORY = 1024; // 1024 KB = 1 MiB
+    const TOTAL_MEMORY = 16 * 1024; // 16384 KiB
+    const OS_MEMORY = 1024; // 1024 KiB = 1 MiB
     const HEAP_SIZE = 128; // 128 KiB
     const STACK_SIZE = 64; // 64 KiB
 
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (allocated) {
                 this.isRunning = true;
             } else {
-                alert(`No se pudo asignar memoria para el proceso "${this.name}" de ${this.size} KB. No hay suficiente espacio contiguo o total.`);
+                alert(`No se pudo asignar memoria para el proceso "${this.name}" de ${this.size} KiB. No hay suficiente espacio contiguo o total.`);
             }
 
             return allocated;
@@ -218,11 +218,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const baseSize = parseInt(processSizeInput.value);
 
         if (!name || isNaN(baseSize) || baseSize <= 0) {
-            alert('Por favor, introduce un nombre válido y un tamaño base válido (en KB).');
+            alert('Por favor, introduce un nombre válido y un tamaño base válido (en KiB).');
             return;
         }
 
-        const newProcess = new Process(nextProcessId++, name, baseSize, [`Tamaño base: ${baseSize}KB`, `Heap: ${HEAP_SIZE}KB`, `Stack: ${STACK_SIZE}KB`]);
+        const newProcess = new Process(nextProcessId++, name, baseSize, [`Tamaño base: ${baseSize}KiB`, `Heap: ${HEAP_SIZE}KiB`, `Stack: ${STACK_SIZE}KiB`]);
         processes.push(newProcess);
 
         processNameInput.value = '';
@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             blockDiv.classList.add(blockClass);
             
-            blockDiv.title = `${block.processId || 'Libre'}${block.processName ? ` - ${block.processName}` : ''}: ${block.size} KB`;
+            blockDiv.title = `${block.processId || 'Libre'}${block.processName ? ` - ${block.processName}` : ''}: ${block.size} KiB`;
             blockDiv.textContent = block.processId || '';
             memoryBarContainer.appendChild(blockDiv);
         });
@@ -325,10 +325,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 <div class="process-details">
-                    <div><strong>Tamaño base:</strong> ${process.baseSize} KB</div>
-                    <div><strong>Heap:</strong> ${process.heapSize} KB</div>
-                    <div><strong>Stack:</strong> ${process.stackSize} KB</div>
-                    <div><strong>Total:</strong> ${process.size} KB</div>
+                    <div><strong>Tamaño base:</strong> ${process.baseSize} KiB</div>
+                    <div><strong>Heap:</strong> ${process.heapSize} KiB</div>
+                    <div><strong>Stack:</strong> ${process.stackSize} KiB</div>
+                    <div><strong>Total:</strong> ${process.size} KiB</div>
                     <div><strong>Dirección:</strong> ${process.memoryBlock ? `0x${process.memoryBlock.startAddress.toString(16).toUpperCase()}` : 'N/A'}</div>
                     <div style="grid-column: span 3"><strong>Segmentos:</strong> ${process.segments.join(', ')}</div>
                 </div>
@@ -355,9 +355,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Fragmentation is total free memory minus the largest free block
         const fragmentation = totalFree - largestFreeBlock;
 
-        totalFreeMemoryEl.textContent = `${totalFree} KB`;
-        fragmentationEl.textContent = `${fragmentation > 0 ? fragmentation : 0} KB`;
-        largestFreeBlockEl.textContent = `${largestFreeBlock} KB`;
+        totalFreeMemoryEl.textContent = `${totalFree} KiB`;
+        fragmentationEl.textContent = `${fragmentation > 0 ? fragmentation : 0} KiB`;
+        largestFreeBlockEl.textContent = `${largestFreeBlock} KiB`;
     }
 
     // Make functions globally accessible
