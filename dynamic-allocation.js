@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     const TOTAL_MEMORY = 16 * 1024; // 16384 KB
     const OS_MEMORY = 1024; // 1024 KB = 1 MiB
+    const HEAP_SIZE = 128; // 128 KiB
+    const STACK_SIZE = 64; // 64 KiB
 
     let memoryBlocks = [];
     let processes = [];
@@ -21,20 +23,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Procesos predeterminados (tomados de las simulaciones estáticas)
     const predefinedProcesses = [
-        { name: "Editor de Texto", size: 512, segments: ["Código: 256KB", "Datos: 128KB", "Buffer: 128KB"] },
-        { name: "Navegador Web", size: 800, segments: ["Motor JS: 300KB", "Renderizado: 250KB", "Cache: 150KB"] },
-        { name: "Base de Datos", size: 600, segments: ["Engine: 200KB", "Índices: 150KB", "Buffer: 200KB"] },
-        { name: "Compilador", size: 400, segments: ["Parser: 120KB", "Optimizador: 150KB", "Generador: 100KB"] },
-        { name: "Sistema Gráfico", size: 900, segments: ["Drivers: 200KB", "OpenGL: 300KB", "Texturas: 250KB"] },
-        { name: "Servidor Grande", size: 1500, segments: ["Sistema: 500KB", "Cache: 600KB", "Buffers: 400KB"] }
+        { name: "Editor de Texto", baseSize: 320, segments: ["Código: 160 KiB", "Datos: 80 KiB", "Buffer: 80 KiB"] },
+        { name: "Navegador Web", baseSize: 608, segments: ["Motor JS: 240 KiB", "Renderizado: 200 KiB", "Cache: 168 KiB"] },
+        { name: "Base de Datos", baseSize: 408, segments: ["Engine: 136 KiB", "Índices: 136 KiB", "Buffer: 136 KiB"] },
+        { name: "Compilador", baseSize: 208, segments: ["Parser: 70 KiB", "Optimizador: 68 KiB", "Generador: 70 KiB"] },
+        { name: "Sistema Gráfico", baseSize: 708, segments: ["Drivers: 236 KiB", "OpenGL: 236 KiB", "Texturas: 236 KiB"] },
+        { name: "Servidor Grande", baseSize: 708, segments: ["Sistema: 236 KiB", "Cache: 236 KiB", "Buffers: 236 KiB"] }
     ];
 
     // Clase Process para mantener consistencia con las estáticas
     class Process {
-        constructor(id, name, size, segments = []) {
+        constructor(id, name, baseSize, segments = []) {
             this.id = id;
             this.name = name;
-            this.size = size;
+            this.baseSize = baseSize; // KiB - tamaño base del programa
+            this.heapSize = HEAP_SIZE; // KiB
+            this.stackSize = STACK_SIZE; // KiB
+            this.size = baseSize + HEAP_SIZE + STACK_SIZE; // Tamaño total en KiB
             this.segments = segments;
             this.isRunning = false;
             this.memoryBlock = null;
@@ -53,6 +58,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 return true;
             }
             return false;
+        }
+
+        getMemoryBreakdown() {
+            return {
+                base: this.baseSize,
+                heap: this.heapSize,
+                stack: this.stackSize,
+                total: this.size
+            };
         }
 
         allocateMemory() {
@@ -149,6 +163,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             this.memoryBlock = null;
             this.isRunning = false;
+
+            // Si el modo de compactación está habilitado, ejecutar compactación automáticamente
+            currentMode = compactionToggle.value;
+            if (currentMode === 'compaction') {
+                // Verificar si hay fragmentación (más de un bloque libre)
+                const freeBlocks = memoryBlocks.filter(b => b.isFree);
+                if (freeBlocks.length > 1) {
+                    setTimeout(() => {
+                        alert('Proceso liberado. Ejecutando compactación automática para eliminar fragmentación...');
+                        compactMemory();
+                        updateUI();
+                    }, 100);
+                }
+            }
         }
     }
 
@@ -175,10 +203,11 @@ document.addEventListener('DOMContentLoaded', () => {
             isFree: true,
         });
 
-        // Crear procesos predeterminados
-        processes = predefinedProcesses.map((processData, index) => 
-            new Process(index + 1, processData.name, processData.size, processData.segments)
-        );
+                // Crear procesos predeterminados
+        predefinedProcesses.forEach((procData, index) => {
+            const process = new Process(index + 1, procData.name, procData.baseSize, procData.segments);
+            processes.push(process);
+        });
         nextProcessId = processes.length + 1;
 
         updateUI();
@@ -186,27 +215,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function createCustomProcess() {
         const name = processNameInput.value.trim();
-        const size = parseInt(processSizeInput.value, 10);
-        
-        if (!name) {
-            alert('Por favor, introduce un nombre para el proceso.');
-            return;
-        }
-        
-        if (isNaN(size) || size <= 0) {
-            alert('Por favor, introduce un tamaño de proceso válido en KB.');
+        const baseSize = parseInt(processSizeInput.value);
+
+        if (!name || isNaN(baseSize) || baseSize <= 0) {
+            alert('Por favor, introduce un nombre válido y un tamaño base válido (en KB).');
             return;
         }
 
-        const newProcess = new Process(nextProcessId++, name, size, [`Tamaño total: ${size}KB`]);
+        const newProcess = new Process(nextProcessId++, name, baseSize, [`Tamaño base: ${baseSize}KB`, `Heap: ${HEAP_SIZE}KB`, `Stack: ${STACK_SIZE}KB`]);
         processes.push(newProcess);
 
         processNameInput.value = '';
         processSizeInput.value = '';
         updateUI();
-    }
-
-    function startProcess(processId) {
+    }    function startProcess(processId) {
         const process = processes.find(p => p.id === processId);
         if (process && process.start()) {
             updateUI();
@@ -303,9 +325,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 <div class="process-details">
-                    <div><strong>Tamaño:</strong> ${process.size} KB</div>
+                    <div><strong>Tamaño base:</strong> ${process.baseSize} KB</div>
+                    <div><strong>Heap:</strong> ${process.heapSize} KB</div>
+                    <div><strong>Stack:</strong> ${process.stackSize} KB</div>
+                    <div><strong>Total:</strong> ${process.size} KB</div>
                     <div><strong>Dirección:</strong> ${process.memoryBlock ? `0x${process.memoryBlock.startAddress.toString(16).toUpperCase()}` : 'N/A'}</div>
-                    <div style="grid-column: span 2"><strong>Segmentos:</strong> ${process.segments.join(', ')}</div>
+                    <div style="grid-column: span 3"><strong>Segmentos:</strong> ${process.segments.join(', ')}</div>
                 </div>
                 <div class="process-controls">
                     <button class="btn start" onclick="startProcess(${process.id})" 

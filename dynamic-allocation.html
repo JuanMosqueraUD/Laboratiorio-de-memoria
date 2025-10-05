@@ -70,8 +70,9 @@
                                 <input type="text" id="processName" class="control-input" placeholder="Ej: Mi Aplicación">
                             </div>
                             <div class="form-group">
-                                <label for="processSize">Tamaño (KB):</label>
+                                <label for="processSize">Tamaño Base (KB):</label>
                                 <input type="number" id="processSize" class="control-input" min="1" placeholder="Ej: 512">
+                                <small>El tamaño total incluirá 192 KB adicionales (128 KB heap + 64 KB stack)</small>
                             </div>
                             <button id="addProcessBtn" class="btn start">Crear Proceso</button>
                         </div>
@@ -110,8 +111,25 @@
                                 <li>Asignación <strong>exacta</strong> del tamaño solicitado</li>
                                 <li>Algoritmo <strong>Mejor Ajuste</strong> (Best Fit)</li>
                                 <li>Compactación opcional para <strong>reducir fragmentación</strong></li>
+                                <li><strong>Compactación automática</strong> al liberar procesos (modo compactación)</li>
                                 <li>Sin límite de tamaño por proceso</li>
                             </ul>
+                        </div>
+                        
+                        <div class="memory-info" id="memoryInfo">
+                            <h3>Gestión de Memoria por Proceso</h3>
+                            <div class="memory-detail">
+                                <span><strong>Tamaño del Heap por proceso:</strong></span>
+                                <span>128 KiB</span>
+                            </div>
+                            <div class="memory-detail">
+                                <span><strong>Tamaño del Stack por proceso:</strong></span>
+                                <span>64 KiB</span>
+                            </div>
+                            <div class="memory-detail">
+                                <span><strong>Overhead total por proceso:</strong></span>
+                                <span>192 KiB</span>
+                            </div>
                         </div>
                     </div>
                 </div>
