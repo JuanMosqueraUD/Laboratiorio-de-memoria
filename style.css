@@ -824,3 +824,61 @@ header p {
         flex-direction: column;
     }
 }
+
+/* Estilos para la tabla de particiones */
+.partition-table-container {
+    margin-top: 20px;
+    background: white;
+    border-radius: 5px;
+    padding: 15px;
+    border: 1px solid #FFBF78;
+}
+
+.partition-table-container h3 {
+    margin-bottom: 15px;
+    color: #7B4019;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.partition-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.partition-table th,
+.partition-table td {
+    border: 1px solid #FFBF78;
+    padding: 8px 12px;
+    text-align: center;
+}
+
+.partition-table th {
+    background-color: #FF7D29;
+    color: white;
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+.partition-table tbody tr:nth-child(even) {
+    background-color: #FFF8E7;
+}
+
+.partition-table tbody tr:hover {
+    background-color: #FFE4B8;
+}
+
+.partition-table .os-row {
+    background-color: #E8F5E8 !important;
+    font-weight: bold;
+}
+
+.partition-table .occupied-row {
+    background-color: #FFE4E1 !important;
+}
+
+.partition-table .free-row {
+    background-color: #F0F8FF !important;
+}
