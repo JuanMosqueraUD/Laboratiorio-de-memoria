@@ -128,6 +128,7 @@ class StaticVariableMemorySimulator {
         this.freeMemory = document.getElementById('freeMemory');
         this.usedMemory = document.getElementById('usedMemory');
         this.currentAlgorithmSpan = document.getElementById('currentAlgorithm');
+        this.partitionTableBody = document.getElementById('partitionTableBody');
         
         // Elementos para crear procesos personalizados
         this.processNameInput = document.getElementById('processName');
@@ -188,6 +189,7 @@ class StaticVariableMemorySimulator {
         this.renderMemory();
         this.renderProcesses();
         this.updateStats();
+        this.updatePartitionTable();
     }
 
     renderMemory() {
@@ -361,6 +363,53 @@ class StaticVariableMemorySimulator {
         
         this.freeMemory.textContent = `${(freeMemory / 1024).toFixed(1)} MiB`;
         this.usedMemory.textContent = `${(occupiedMemory / 1024).toFixed(1)} MiB`;
+    }
+
+    updatePartitionTable() {
+        if (!this.partitionTableBody) return;
+        
+        this.partitionTableBody.innerHTML = '';
+        
+        this.partitions.forEach((partition, index) => {
+            const row = document.createElement('tr');
+            
+            // Determinar PID y nombre
+            let pid = '-';
+            let processName = '-';
+            let rowClass = 'free-row';
+            
+            if (partition.reserved) {
+                // Sistema Operativo
+                pid = 'OS';
+                processName = partition.name || 'Sistema Operativo';
+                rowClass = 'os-row';
+            } else if (partition.isOccupied && partition.process) {
+                // Proceso normal
+                pid = `P${partition.process.id}`;
+                processName = partition.process.name || 'Proceso sin nombre';
+                rowClass = 'occupied-row';
+            }
+            
+            // Valor L/O (Libre/Ocupado)
+            const loValue = (partition.reserved || partition.isOccupied) ? '1' : '0';
+            
+            // Dirección base
+            const baseAddress = partition.getAddressHex();
+            
+            // Tamaño de la partición
+            const partitionSize = `${partition.size} KiB`;
+            
+            row.className = rowClass;
+            row.innerHTML = `
+                <td>${pid}</td>
+                <td>${processName}</td>
+                <td>${loValue}</td>
+                <td>${baseAddress}</td>
+                <td>${partitionSize}</td>
+            `;
+            
+            this.partitionTableBody.appendChild(row);
+        });
     }
 
     showPartitionInfo(partition) {
