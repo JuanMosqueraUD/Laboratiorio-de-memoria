@@ -76,7 +76,7 @@ class StaticFixedMemorySimulator {
     constructor() {
         this.partitions = [];
         this.processes = [];
-        this.nextProcessId = 7; // Comenzar después de los procesos predeterminados
+        this.nextProcessId = 9; // Comenzar después de los procesos predeterminados
         this.init();
     }
 
@@ -108,7 +108,9 @@ class StaticFixedMemorySimulator {
             new Process(3, "Base de Datos", 408, ["Engine: 136 KiB", "Índices: 136 KiB", "Buffer: 136 KiB"]),
             new Process(4, "Compilador", 208, ["Parser: 70 KiB", "Optimizador: 68 KiB", "Generador: 70 KiB"]),
             new Process(5, "Sistema Gráfico", 708, ["Drivers: 236 KiB", "OpenGL: 236 KiB", "Texturas: 236 KiB"]),
-            new Process(6, "Servidor Grande", 708, ["Sistema: 236 KiB", "Cache: 236 KiB", "Buffers: 236 KiB"])
+            new Process(6, "Servidor Grande", 1308, ["Sistema: 436 KiB", "Cache: 436 KiB", "Buffers: 436 KiB"]),
+            new Process(7, "Sistema Masivo", 3508, ["Kernel: 1169 KiB", "Drivers: 1169 KiB", "Buffers: 1170 KiB"]),
+            new Process(8, "Aplicación Enorme", 3908, ["Framework: 1302 KiB", "Datos: 1303 KiB", "Cache: 1303 KiB"])
         ];
 
         this.setupUI();
@@ -347,9 +349,11 @@ class StaticFixedMemorySimulator {
             new Process(3, "Base de Datos", 408, ["Engine: 136 KiB", "Índices: 136 KiB", "Buffer: 136 KiB"]),
             new Process(4, "Compilador", 208, ["Parser: 70 KiB", "Optimizador: 68 KiB", "Generador: 70 KiB"]),
             new Process(5, "Sistema Gráfico", 708, ["Drivers: 236 KiB", "OpenGL: 236 KiB", "Texturas: 236 KiB"]),
-            new Process(6, "Servidor Grande", 708, ["Sistema: 236 KiB", "Cache: 236 KiB", "Buffers: 236 KiB"])
+            new Process(6, "Servidor Grande", 1308, ["Sistema: 436 KiB", "Cache: 436 KiB", "Buffers: 436 KiB"]),
+            new Process(7, "Sistema Masivo", 3508, ["Kernel: 1169 KiB", "Drivers: 1169 KiB", "Buffers: 1170 KiB"]),
+            new Process(8, "Aplicación Enorme", 3908, ["Framework: 1302 KiB", "Datos: 1303 KiB", "Cache: 1303 KiB"])
         ];
-        this.nextProcessId = 7;
+        this.nextProcessId = 9;
         
         // Volver a reservar P0 para el SO tras reiniciar
         const p0 = this.partitions[0];

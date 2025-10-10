@@ -28,7 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: "Base de Datos", baseSize: 408, segments: ["Engine: 136 KiB", "Índices: 136 KiB", "Buffer: 136 KiB"] },
         { name: "Compilador", baseSize: 208, segments: ["Parser: 70 KiB", "Optimizador: 68 KiB", "Generador: 70 KiB"] },
         { name: "Sistema Gráfico", baseSize: 708, segments: ["Drivers: 236 KiB", "OpenGL: 236 KiB", "Texturas: 236 KiB"] },
-        { name: "Servidor Grande", baseSize: 708, segments: ["Sistema: 236 KiB", "Cache: 236 KiB", "Buffers: 236 KiB"] }
+        { name: "Servidor Grande", baseSize: 1308, segments: ["Sistema: 436 KiB", "Cache: 436 KiB", "Buffers: 436 KiB"] },
+        { name: "Sistema Masivo", baseSize: 3508, segments: ["Kernel: 1169 KiB", "Drivers: 1169 KiB", "Buffers: 1170 KiB"] },
+        { name: "Aplicación Enorme", baseSize: 3908, segments: ["Framework: 1302 KiB", "Datos: 1303 KiB", "Cache: 1303 KiB"] }
     ];
 
     // Clase Process para mantener consistencia con las estáticas
@@ -90,7 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         .reduce((sum, b) => sum + b.size, 0);
 
                     if (totalFree >= this.size) {
-                        alert('No hay un bloque contiguo lo suficientemente grande. Iniciando compactación de memoria...');
                         compactMemory();
                         // After compaction, the last block is the one big free block
                         const newFreeBlock = memoryBlocks[memoryBlocks.length - 1];
@@ -171,7 +172,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const freeBlocks = memoryBlocks.filter(b => b.isFree);
                 if (freeBlocks.length > 1) {
                     setTimeout(() => {
-                        alert('Proceso liberado. Ejecutando compactación automática para eliminar fragmentación...');
                         compactMemory();
                         updateUI();
                     }, 100);
