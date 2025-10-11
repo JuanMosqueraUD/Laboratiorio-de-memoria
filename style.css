@@ -754,11 +754,13 @@ header p {
 #processTable th, #processTable td {
     border: 1px solid #FFBF78;
     padding: 8px;
-    text-align: left;
+    text-align: center;
 }
 
 #processTable th {
-    background-color: #f2f2f2;
+    background-color: #FF7D29;
+    color: white;
+    font-weight: bold;
 }
 
 .info-grid-dynamic {
@@ -862,8 +864,12 @@ header p {
     font-size: 0.95rem;
 }
 
+.partition-table tbody tr {
+    background-color: white;
+}
+
 .partition-table tbody tr:nth-child(even) {
-    background-color: #FFF8E7;
+    background-color: white;
 }
 
 .partition-table tbody tr:hover {
@@ -881,4 +887,115 @@ header p {
 
 .partition-table .free-row {
     background-color: #F0F8FF !important;
+}
+
+.partition-table .empty-row {
+    background-color: white !important;
+}
+
+/* Asegurar que el texto esté centrado en las tablas dinámicas */
+#processTable th,
+#processTable td,
+#freeFragmentsTable th,
+#freeFragmentsTable td {
+    text-align: center;
+}
+
+/* Estilos específicos para las tablas dinámicas - fondo blanco por defecto */
+#processTable tbody tr,
+#freeFragmentsTable tbody tr {
+    background-color: white;
+}
+
+/* Mantener colores específicos para filas con información especial */
+#processTable .os-row,
+#freeFragmentsTable .os-row {
+    background-color: #E8F5E8 !important;
+    font-weight: bold;
+}
+
+#processTable .occupied-row,
+#freeFragmentsTable .occupied-row {
+    background-color: #FFE4E1 !important;
+}
+
+#processTable .free-row,
+#freeFragmentsTable .free-row {
+    background-color: #F0F8FF !important;
+}
+
+#processTable .empty-row,
+#freeFragmentsTable .empty-row {
+    background-color: white !important;
+}
+
+/* Estilos específicos para las tablas dinámicas */
+.memory-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-top: 10px;
+}
+
+.memory-table th,
+.memory-table td {
+    border: 1px solid #FFBF78;
+    padding: 8px 12px;
+    text-align: center;
+}
+
+.memory-table th {
+    background-color: #FF7D29;
+    color: white;
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+.memory-table tbody tr {
+    background-color: white;
+}
+
+.memory-table tbody tr:nth-child(even) {
+    background-color: white;
+}
+
+.memory-table tbody tr:hover {
+    background-color: #FFE4B8;
+}
+
+.table-container {
+    position: relative;
+    min-height: 60px;
+}
+
+.empty-table-message {
+    display: none;
+    text-align: center;
+    color: #7B4019;
+    font-style: italic;
+    padding: 20px;
+    background-color: #FFF8E7;
+    border: 1px solid #FFBF78;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.empty-table-message.show {
+    display: block;
+}
+
+.partition-table {
+    margin-top: 20px;
+    background: white;
+    border-radius: 5px;
+    padding: 15px;
+    border: 1px solid #FFBF78;
+}
+
+.partition-table h3 {
+    margin-bottom: 15px;
+    color: #7B4019;
+    font-size: 1.1rem;
+    font-weight: bold;
 }

@@ -54,6 +54,43 @@
                                 <span>Espacio Libre</span>
                             </div>
                         </div>
+                        
+                        <!-- Tabla de Procesos -->
+                        <div class="partition-table-container">
+                            <h3>Tabla de Procesos</h3>
+                            <table class="partition-table" id="processTable">
+                                <thead>
+                                    <tr>
+                                        <th>PID</th>
+                                        <th>Nombre</th>
+                                        <th>Base (KiB)</th>
+                                        <th>Tamaño (KiB)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="processTableBody">
+                                    <!-- Las filas se generarán dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Tabla de Fragmentos Libres -->
+                        <div class="partition-table-container">
+                            <h3>Tabla de Fragmentos Libres</h3>
+                            <table class="partition-table" id="freeFragmentsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Base (KiB)</th>
+                                        <th>Tamaño (KiB)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="freeFragmentsTableBody">
+                                    <!-- Las filas se generarán dinámicamente -->
+                                </tbody>
+                            </table>
+                            <div class="empty-table-message" id="freeFragmentsTableEmpty">
+                                No hay fragmentos libres
+                            </div>
+                        </div>
                     </div>
                 </div>
 

@@ -289,7 +289,7 @@ class StaticFixedMemorySimulator {
             // Determinar PID y nombre
             let pid = '-';
             let processName = '-';
-            let rowClass = 'free-row';
+            let rowClass = 'empty-row';  // Cambio: usar empty-row para particiones sin procesos
             
             if (partition.isOccupied && partition.process) {
                 if (index === 0) {

@@ -358,6 +358,98 @@ document.addEventListener('DOMContentLoaded', () => {
         totalFreeMemoryEl.textContent = `${totalFree} KiB`;
         fragmentationEl.textContent = `${fragmentation > 0 ? fragmentation : 0} KiB`;
         largestFreeBlockEl.textContent = `${largestFreeBlock} KiB`;
+
+        // Actualizar tablas
+        updateProcessTable();
+        updateFreeFragmentsTable();
+    }
+
+    function updateProcessTable() {
+        const processTableBody = document.getElementById('processTableBody');
+        
+        if (!processTableBody) return;
+        
+        // Limpiar tabla
+        processTableBody.innerHTML = '';
+        
+        // SIEMPRE agregar el Sistema Operativo como primera fila
+        const osRow = document.createElement('tr');
+        osRow.className = 'os-row';
+        osRow.innerHTML = `
+            <td>OS</td>
+            <td>Sistema Operativo</td>
+            <td>0</td>
+            <td>1024 KiB</td>
+        `;
+        processTableBody.appendChild(osRow);
+        
+        // Obtener procesos activos (excluyendo el SO)
+        const activeProcesses = processes.filter(p => p.isRunning && p.memoryBlock);
+        
+        // Agregar filas de procesos activos ordenados por dirección de memoria
+        activeProcesses.sort((a, b) => {
+            const aStart = a.memoryBlock.start || a.memoryBlock.startAddress || 0;
+            const bStart = b.memoryBlock.start || b.memoryBlock.startAddress || 0;
+            return aStart - bStart;
+        });
+        
+        activeProcesses.forEach(process => {
+            const row = document.createElement('tr');
+            row.className = 'occupied-row';
+            const startAddr = process.memoryBlock.start || process.memoryBlock.startAddress || 0;
+            row.innerHTML = `
+                <td>P${process.id}</td>
+                <td>${process.name}</td>
+                <td>${startAddr}</td>
+                <td>${process.size} KiB</td>
+            `;
+            processTableBody.appendChild(row);
+        });
+    }
+
+    function updateFreeFragmentsTable() {
+        const freeFragmentsTableBody = document.getElementById('freeFragmentsTableBody');
+        const freeFragmentsTableEmpty = document.getElementById('freeFragmentsTableEmpty');
+        const freeFragmentsTable = document.getElementById('freeFragmentsTable');
+        
+        if (!freeFragmentsTableBody) return;
+        
+        // Obtener todos los bloques libres de memoria (excluyendo el área del SO)
+        const freeBlocks = memoryBlocks.filter(block => {
+            const blockStart = block.start || block.startAddress || 0;
+            return block.isFree && blockStart >= OS_MEMORY;
+        });
+        
+        // Limpiar tabla
+        freeFragmentsTableBody.innerHTML = '';
+        
+        if (freeBlocks.length === 0) {
+            // Mostrar mensaje de tabla vacía
+            if (freeFragmentsTable) freeFragmentsTable.style.display = 'none';
+            if (freeFragmentsTableEmpty) freeFragmentsTableEmpty.classList.add('show');
+        } else {
+            // Ocultar mensaje y mostrar tabla
+            if (freeFragmentsTable) freeFragmentsTable.style.display = 'table';
+            if (freeFragmentsTableEmpty) freeFragmentsTableEmpty.classList.remove('show');
+            
+            // Agregar filas de fragmentos libres ordenados por dirección base
+            freeBlocks.sort((a, b) => {
+                const aStart = a.start || a.startAddress || 0;
+                const bStart = b.start || b.startAddress || 0;
+                return aStart - bStart;
+            });
+            
+            freeBlocks.forEach(block => {
+                const row = document.createElement('tr');
+                row.className = 'free-row';
+                const startAddr = block.start || block.startAddress || 0;
+                row.innerHTML = `
+                    <td>${startAddr}</td>
+                    <td>${block.size} KiB</td>
+                `;
+                freeFragmentsTableBody.appendChild(row);
+            });
+        }
     }
 
     // Make functions globally accessible
