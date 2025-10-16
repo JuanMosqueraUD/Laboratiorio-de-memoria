@@ -31,16 +31,35 @@ class MemoryPartition {
     }
 }
 
-// Proceso
-class Process {
+// ProcessTemplate: representa el tipo de proceso (plantilla)
+class ProcessTemplate {
     constructor(id, name, baseSize, segments) {
         this.id = id;
         this.name = name;
-        this.baseSize = baseSize; // KiB - tamaño base del programa
+        this.baseSize = baseSize;
+        this.heapSize = HEAP_SIZE;
+        this.stackSize = STACK_SIZE;
+        this.size = baseSize + HEAP_SIZE + STACK_SIZE;
+        this.segments = segments;
+        this.instances = []; // Array de instancias activas
+    }
+
+    getInstanceCount() {
+        return this.instances.filter(inst => inst.isRunning).length;
+    }
+}
+
+// ProcessInstance: instancia específica de un proceso en memoria
+class ProcessInstance {
+    constructor(id, template) {
+        this.id = id;
+        this.template = template;
+        this.name = template.name;
+        this.baseSize = template.baseSize; // KiB - tamaño base del programa
         this.heapSize = HEAP_SIZE; // KiB
         this.stackSize = STACK_SIZE; // KiB
-        this.size = baseSize + HEAP_SIZE + STACK_SIZE; // Tamaño total en KiB
-        this.segments = segments;
+        this.size = template.baseSize + HEAP_SIZE + STACK_SIZE; // Tamaño total en KiB
+        this.segments = template.segments;
         this.isRunning = false;
         this.partition = null;
     }
@@ -75,8 +94,9 @@ class Process {
 class StaticFixedMemorySimulator {
     constructor() {
         this.partitions = [];
+        this.processTemplates = [];
         this.processes = [];
-        this.nextProcessId = 9; // Comenzar después de los procesos predeterminados
+        this.nextProcessId = 1;
         this.init();
     }
 
@@ -101,17 +121,18 @@ class StaticFixedMemorySimulator {
             this.partitions.push(partition);
         }
 
-        // Crear procesos predeterminados
-        this.processes = [
-            new Process(1, "Editor de Texto", 320, ["Código: 160 KiB", "Datos: 80 KiB", "Buffer: 80 KiB"]),
-            new Process(2, "Navegador Web", 608, ["Motor JS: 240 KiB", "Renderizado: 200 KiB", "Cache: 168 KiB"]),
-            new Process(3, "Base de Datos", 408, ["Engine: 136 KiB", "Índices: 136 KiB", "Buffer: 136 KiB"]),
-            new Process(4, "Compilador", 208, ["Parser: 70 KiB", "Optimizador: 68 KiB", "Generador: 70 KiB"]),
-            new Process(5, "Sistema Gráfico", 708, ["Drivers: 236 KiB", "OpenGL: 236 KiB", "Texturas: 236 KiB"]),
-            new Process(6, "Servidor Grande", 1308, ["Sistema: 436 KiB", "Cache: 436 KiB", "Buffers: 436 KiB"]),
-            new Process(7, "Sistema Masivo", 3508, ["Kernel: 1169 KiB", "Drivers: 1169 KiB", "Buffers: 1170 KiB"]),
-            new Process(8, "Aplicación Enorme", 3908, ["Framework: 1302 KiB", "Datos: 1303 KiB", "Cache: 1303 KiB"])
+        // Crear templates de procesos predeterminados
+        this.processTemplates = [
+            new ProcessTemplate(1, "Editor de Texto", 320, ["Código: 160 KiB", "Datos: 80 KiB", "Buffer: 80 KiB"]),
+            new ProcessTemplate(2, "Navegador Web", 608, ["Motor JS: 240 KiB", "Renderizado: 200 KiB", "Cache: 168 KiB"]),
+            new ProcessTemplate(3, "Base de Datos", 408, ["Engine: 136 KiB", "Índices: 136 KiB", "Buffer: 136 KiB"]),
+            new ProcessTemplate(4, "Compilador", 208, ["Parser: 70 KiB", "Optimizador: 68 KiB", "Generador: 70 KiB"]),
+            new ProcessTemplate(5, "Sistema Gráfico", 708, ["Drivers: 236 KiB", "OpenGL: 236 KiB", "Texturas: 236 KiB"]),
+            new ProcessTemplate(6, "Servidor Grande", 1308, ["Sistema: 436 KiB", "Cache: 436 KiB", "Buffers: 436 KiB"]),
+            new ProcessTemplate(7, "Sistema Masivo", 3508, ["Kernel: 1169 KiB", "Drivers: 1169 KiB", "Buffers: 1170 KiB"]),
+            new ProcessTemplate(8, "Aplicación Enorme", 3908, ["Framework: 1302 KiB", "Datos: 1303 KiB", "Cache: 1303 KiB"])
         ];
+        this.nextProcessId = 9;
 
         this.setupUI();
         this.updateDisplay();
@@ -187,32 +208,33 @@ class StaticFixedMemorySimulator {
     renderProcesses() {
         this.processList.innerHTML = '';
         
-        this.processes.forEach(process => {
-            const breakdown = process.getMemoryBreakdown();
+        this.processTemplates.forEach(template => {
             const div = document.createElement('div');
             div.className = 'process-item';
+            const runningCount = template.getInstanceCount();
+            const hasInstances = runningCount > 0;
+            
             div.innerHTML = `
                 <div class="process-header">
-                    <div class="process-name">${process.name}</div>
-                    <div class="process-status ${process.isRunning ? 'running' : 'stopped'}">
-                        ${process.isRunning ? 'EJECUTANDO' : 'DETENIDO'}
+                    <div class="process-name">${template.name}</div>
+                    <div class="process-status ${hasInstances ? 'running' : 'stopped'}">
+                        ${hasInstances ? `EJECUTANDO (${runningCount})` : 'DETENIDO'}
                     </div>
                 </div>
                 <div class="process-details">
-                    <div><strong>Tamaño base:</strong> ${breakdown.base} KiB</div>
-                    <div><strong>Heap:</strong> ${breakdown.heap} KiB</div>
-                    <div><strong>Stack:</strong> ${breakdown.stack} KiB</div>
-                    <div><strong>Tamaño total:</strong> ${breakdown.total} KiB</div>
-                    <div><strong>Partición:</strong> ${process.partition ? `P${process.partition.id}` : 'Ninguna'}</div>
-                    <div style="grid-column: span 2"><strong>Segmentos:</strong> ${process.segments.join(', ')}</div>
+                    <div><strong>Tamaño base:</strong> ${template.baseSize} KiB</div>
+                    <div><strong>Heap:</strong> ${template.heapSize} KiB</div>
+                    <div><strong>Stack:</strong> ${template.stackSize} KiB</div>
+                    <div><strong>Tamaño total:</strong> ${template.size} KiB</div>
+                    <div><strong>Instancias:</strong> ${runningCount}</div>
+                    <div style="grid-column: span 2"><strong>Segmentos:</strong> ${template.segments.join(', ')}</div>
                 </div>
                 <div class="process-controls">
-                    <button class="btn start" onclick="simulator.startProcess(${process.id})" 
-                            ${process.isRunning ? 'disabled' : ''}>
+                    <button class="btn start" onclick="simulator.startProcess(${template.id})">
                         Iniciar
                     </button>
-                    <button class="btn stop" onclick="simulator.stopProcess(${process.id})"
-                            ${!process.isRunning ? 'disabled' : ''}>
+                    <button class="btn stop" onclick="simulator.stopProcess(${template.id})"
+                            ${!hasInstances ? 'disabled' : ''}>
                         Detener
                     </button>
                 </div>
@@ -221,50 +243,53 @@ class StaticFixedMemorySimulator {
         });
     }
 
-    allocateProcess(processId) {
-        const process = this.processes.find(p => p.id === processId);
-        if (!process) return false;
+    startProcess(templateId) {
+        const template = this.processTemplates.find(t => t.id === templateId);
+        if (!template) return;
 
+        // Crear nueva instancia
+        const instance = new ProcessInstance(this.nextProcessId++, template);
+        
         // Verificar si el proceso es demasiado grande SOLO al intentar asignarlo
-        if (process.size > 1024) {
-            alert(`Error: El proceso "${process.name}" (${process.size} KiB) es demasiado grande para las particiones disponibles (máximo 1024 KiB)`);
-            return false;
+        if (instance.size > 1024) {
+            alert(`Error: El proceso "${instance.name}" (${instance.size} KiB) es demasiado grande para las particiones disponibles (máximo 1024 KiB)`);
+            return;
         }
         
         // Buscar una partición libre que no sea P0
         const freePartition = this.partitions.find(p => !p.isOccupied && p.id !== 0);
         if (!freePartition) {
             alert('No hay particiones libres disponibles (P0 está reservada para el sistema operativo)');
-            return false;
+            return;
         }
-        freePartition.allocate(process);
-        process.partition = freePartition;
-        return true;
+
+        freePartition.allocate(instance);
+        instance.partition = freePartition;
+        instance.isRunning = true;
+        
+        template.instances.push(instance);
+        this.processes.push(instance);
+        
+        this.updateDisplay();
     }
 
-    startProcess(processId) {
-        const process = this.processes.find(p => p.id === processId);
-        
-        // Si el proceso no tiene partición asignada, intentar asignar una
-        if (!process.partition) {
-            if (!this.allocateProcess(processId)) {
-                return;
-            }
-        }
-        
-        if (process.start()) {
-            this.updateDisplay();
-        }
-    }
+    stopProcess(templateId) {
+        const template = this.processTemplates.find(t => t.id === templateId);
+        if (!template || template.instances.length === 0) return;
 
-    stopProcess(processId) {
-        const process = this.processes.find(p => p.id === processId);
-        
-        if (process && process.stop()) {
+        // Detener la instancia más antigua (FIFO)
+        const oldest = template.instances.shift();
+        if (oldest) {
+            oldest.isRunning = false;
             // Liberar la partición cuando se detiene el proceso
-            if (process.partition) {
-                process.partition.deallocate();
-                process.partition = null;
+            if (oldest.partition) {
+                oldest.partition.deallocate();
+                oldest.partition = null;
+            }
+            // Remover de la lista de procesos
+            const index = this.processes.indexOf(oldest);
+            if (index > -1) {
+                this.processes.splice(index, 1);
             }
             this.updateDisplay();
         }
@@ -369,8 +394,13 @@ class StaticFixedMemorySimulator {
             return;
         }
 
-        const newProcess = new Process(this.nextProcessId++, name, baseSize, [`Base: ${baseSize} KiB`, `Heap: ${HEAP_SIZE} KiB`, `Stack: ${STACK_SIZE} KiB`]);
-        this.processes.push(newProcess);
+        const newTemplate = new ProcessTemplate(
+            this.processTemplates.length + 1,
+            name, 
+            baseSize, 
+            [`Base: ${baseSize} KiB`, `Heap: ${HEAP_SIZE} KiB`, `Stack: ${STACK_SIZE} KiB`]
+        );
+        this.processTemplates.push(newTemplate);
 
         this.processNameInput.value = '';
         this.processSizeInput.value = '';
@@ -381,7 +411,7 @@ class StaticFixedMemorySimulator {
         // Detener todos los procesos y liberar particiones
         this.processes.forEach(process => {
             if (process.isRunning) {
-                process.stop();
+                process.isRunning = false;
             }
             if (process.partition) {
                 process.partition.deallocate();
@@ -389,16 +419,22 @@ class StaticFixedMemorySimulator {
             }
         });
         
-        // Resetear a solo los procesos predeterminados
-        this.processes = [
-            new Process(1, "Editor de Texto", 320, ["Código: 160 KiB", "Datos: 80 KiB", "Buffer: 80 KiB"]),
-            new Process(2, "Navegador Web", 608, ["Motor JS: 240 KiB", "Renderizado: 200 KiB", "Cache: 168 KiB"]),
-            new Process(3, "Base de Datos", 408, ["Engine: 136 KiB", "Índices: 136 KiB", "Buffer: 136 KiB"]),
-            new Process(4, "Compilador", 208, ["Parser: 70 KiB", "Optimizador: 68 KiB", "Generador: 70 KiB"]),
-            new Process(5, "Sistema Gráfico", 708, ["Drivers: 236 KiB", "OpenGL: 236 KiB", "Texturas: 236 KiB"]),
-            new Process(6, "Servidor Grande", 1308, ["Sistema: 436 KiB", "Cache: 436 KiB", "Buffers: 436 KiB"]),
-            new Process(7, "Sistema Masivo", 3508, ["Kernel: 1169 KiB", "Drivers: 1169 KiB", "Buffers: 1170 KiB"]),
-            new Process(8, "Aplicación Enorme", 3908, ["Framework: 1302 KiB", "Datos: 1303 KiB", "Cache: 1303 KiB"])
+        // Limpiar todas las instancias de los templates
+        this.processTemplates.forEach(template => {
+            template.instances = [];
+        });
+        
+        // Resetear a solo los templates predeterminados
+        this.processes = [];
+        this.processTemplates = [
+            new ProcessTemplate(1, "Editor de Texto", 320, ["Código: 160 KiB", "Datos: 80 KiB", "Buffer: 80 KiB"]),
+            new ProcessTemplate(2, "Navegador Web", 608, ["Motor JS: 240 KiB", "Renderizado: 200 KiB", "Cache: 168 KiB"]),
+            new ProcessTemplate(3, "Base de Datos", 408, ["Engine: 136 KiB", "Índices: 136 KiB", "Buffer: 136 KiB"]),
+            new ProcessTemplate(4, "Compilador", 208, ["Parser: 70 KiB", "Optimizador: 68 KiB", "Generador: 70 KiB"]),
+            new ProcessTemplate(5, "Sistema Gráfico", 708, ["Drivers: 236 KiB", "OpenGL: 236 KiB", "Texturas: 236 KiB"]),
+            new ProcessTemplate(6, "Servidor Grande", 1308, ["Sistema: 436 KiB", "Cache: 436 KiB", "Buffers: 436 KiB"]),
+            new ProcessTemplate(7, "Sistema Masivo", 3508, ["Kernel: 1169 KiB", "Drivers: 1169 KiB", "Buffers: 1170 KiB"]),
+            new ProcessTemplate(8, "Aplicación Enorme", 3908, ["Framework: 1302 KiB", "Datos: 1303 KiB", "Cache: 1303 KiB"])
         ];
         this.nextProcessId = 9;
         

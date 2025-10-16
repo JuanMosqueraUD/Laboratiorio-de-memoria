@@ -33,16 +33,49 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: "Aplicación Enorme", baseSize: 3908, segments: ["Framework: 1302 KiB", "Datos: 1303 KiB", "Cache: 1303 KiB"] }
     ];
 
-    // Clase Process para mantener consistencia con las estáticas
-    class Process {
+    // ProcessTemplate: representa el tipo de proceso (plantilla)
+    class ProcessTemplate {
         constructor(id, name, baseSize, segments = []) {
             this.id = id;
             this.name = name;
-            this.baseSize = baseSize; // KiB - tamaño base del programa
+            this.baseSize = baseSize;
+            this.segments = segments;
+            this.instances = []; // Array de instancias activas
+        }
+
+        createInstance() {
+            const instance = new ProcessInstance(nextProcessId++, this);
+            this.instances.push(instance);
+            processes.push(instance);
+            return instance;
+        }
+
+        removeOldestInstance() {
+            if (this.instances.length === 0) return null;
+            const oldest = this.instances.shift(); // FIFO - eliminar el primero
+            const index = processes.indexOf(oldest);
+            if (index > -1) {
+                processes.splice(index, 1);
+            }
+            return oldest;
+        }
+
+        getInstanceCount() {
+            return this.instances.filter(inst => inst.isRunning).length;
+        }
+    }
+
+    // ProcessInstance: instancia específica de un proceso en memoria
+    class ProcessInstance {
+        constructor(id, template) {
+            this.id = id;
+            this.template = template;
+            this.name = template.name;
+            this.baseSize = template.baseSize; // KiB - tamaño base del programa
             this.heapSize = HEAP_SIZE; // KiB
             this.stackSize = STACK_SIZE; // KiB
-            this.size = baseSize + HEAP_SIZE + STACK_SIZE; // Tamaño total en KiB
-            this.segments = segments;
+            this.size = template.baseSize + HEAP_SIZE + STACK_SIZE; // Tamaño total en KiB
+            this.segments = template.segments;
             this.isRunning = false;
             this.memoryBlock = null;
         }
@@ -180,10 +213,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Templates de procesos disponibles
+    let processTemplates = [];
+
     function init() {
         // Reset state
         memoryBlocks = [];
         processes = [];
+        processTemplates = [];
         nextProcessId = 1;
 
         // OS block
@@ -203,12 +240,11 @@ document.addEventListener('DOMContentLoaded', () => {
             isFree: true,
         });
 
-                // Crear procesos predeterminados
+        // Crear templates de procesos predeterminados
         predefinedProcesses.forEach((procData, index) => {
-            const process = new Process(index + 1, procData.name, procData.baseSize, procData.segments);
-            processes.push(process);
+            const template = new ProcessTemplate(index + 1, procData.name, procData.baseSize, procData.segments);
+            processTemplates.push(template);
         });
-        nextProcessId = processes.length + 1;
 
         updateUI();
     }
@@ -222,22 +258,36 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const newProcess = new Process(nextProcessId++, name, baseSize, [`Tamaño base: ${baseSize}KiB`, `Heap: ${HEAP_SIZE}KiB`, `Stack: ${STACK_SIZE}KiB`]);
-        processes.push(newProcess);
+        const newTemplate = new ProcessTemplate(
+            processTemplates.length + 1, 
+            name, 
+            baseSize, 
+            [`Tamaño base: ${baseSize}KiB`, `Heap: ${HEAP_SIZE}KiB`, `Stack: ${STACK_SIZE}KiB`]
+        );
+        processTemplates.push(newTemplate);
 
         processNameInput.value = '';
         processSizeInput.value = '';
         updateUI();
-    }    function startProcess(processId) {
-        const process = processes.find(p => p.id === processId);
-        if (process && process.start()) {
+    }    function startProcess(templateId) {
+        const template = processTemplates.find(t => t.id === templateId);
+        if (!template) return;
+
+        // Crear nueva instancia
+        const instance = template.createInstance();
+        if (instance && instance.start()) {
             updateUI();
         }
     }
 
-    function stopProcess(processId) {
-        const process = processes.find(p => p.id === processId);
-        if (process && process.stop()) {
+    function stopProcess(templateId) {
+        const template = processTemplates.find(t => t.id === templateId);
+        if (!template || template.instances.length === 0) return;
+
+        // Detener la instancia más antigua (FIFO)
+        const oldest = template.instances[0];
+        if (oldest && oldest.stop()) {
+            template.removeOldestInstance();
             updateUI();
         }
     }
@@ -297,11 +347,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderProcesses() {
         processList.innerHTML = '';
         
-        processes.forEach(process => {
+        processTemplates.forEach(template => {
             const div = document.createElement('div');
             div.className = 'process-item';
             
             // Determinar si el proceso es demasiado grande para la memoria disponible
+            const processSize = template.baseSize + HEAP_SIZE + STACK_SIZE;
             const maxFreeMemory = Math.max(
                 ...memoryBlocks.filter(b => b.isFree).map(b => b.size),
                 0
@@ -310,35 +361,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 .filter(b => b.isFree)
                 .reduce((sum, b) => sum + b.size, 0);
             
-            const canFit = process.size <= maxFreeMemory || 
-                          (currentMode === 'compaction' && process.size <= totalFreeMemory);
+            const canFit = processSize <= maxFreeMemory || 
+                          (currentMode === 'compaction' && processSize <= totalFreeMemory);
             
-            if (!canFit && !process.isRunning) {
+            const runningCount = template.getInstanceCount();
+            const hasInstances = runningCount > 0;
+            
+            if (!canFit && !hasInstances) {
                 div.classList.add('too-large');
             }
             
             div.innerHTML = `
                 <div class="process-header">
-                    <div class="process-name">${process.name}</div>
-                    <div class="process-status ${process.isRunning ? 'running' : 'stopped'}">
-                        ${process.isRunning ? 'EJECUTANDO' : 'DETENIDO'}
+                    <div class="process-name">${template.name}</div>
+                    <div class="process-status ${hasInstances ? 'running' : 'stopped'}">
+                        ${hasInstances ? `EJECUTANDO (${runningCount})` : 'DETENIDO'}
                     </div>
                 </div>
                 <div class="process-details">
-                    <div><strong>Tamaño base:</strong> ${process.baseSize} KiB</div>
-                    <div><strong>Heap:</strong> ${process.heapSize} KiB</div>
-                    <div><strong>Stack:</strong> ${process.stackSize} KiB</div>
-                    <div><strong>Total:</strong> ${process.size} KiB</div>
-                    <div><strong>Dirección:</strong> ${process.memoryBlock ? `0x${process.memoryBlock.startAddress.toString(16).toUpperCase()}` : 'N/A'}</div>
-                    <div style="grid-column: span 3"><strong>Segmentos:</strong> ${process.segments.join(', ')}</div>
+                    <div><strong>Tamaño base:</strong> ${template.baseSize} KiB</div>
+                    <div><strong>Heap:</strong> ${HEAP_SIZE} KiB</div>
+                    <div><strong>Stack:</strong> ${STACK_SIZE} KiB</div>
+                    <div><strong>Total:</strong> ${processSize} KiB</div>
+                    <div><strong>Instancias:</strong> ${runningCount}</div>
+                    <div style="grid-column: span 3"><strong>Segmentos:</strong> ${template.segments.join(', ')}</div>
                 </div>
                 <div class="process-controls">
-                    <button class="btn start" onclick="startProcess(${process.id})" 
-                            ${process.isRunning || !canFit ? 'disabled' : ''}>
+                    <button class="btn start" onclick="startProcess(${template.id})" 
+                            ${!canFit ? 'disabled' : ''}>
                         Iniciar
                     </button>
-                    <button class="btn stop" onclick="stopProcess(${process.id})"
-                            ${!process.isRunning ? 'disabled' : ''}>
+                    <button class="btn stop" onclick="stopProcess(${template.id})"
+                            ${!hasInstances ? 'disabled' : ''}>
                         Detener
                     </button>
                 </div>
