@@ -123,14 +123,14 @@ class StaticFixedMemorySimulator {
 
         // Crear templates de procesos predeterminados
         this.processTemplates = [
-            new ProcessTemplate(1, "Editor de Texto", 320, ["Código: 160 KiB", "Datos: 80 KiB", "Buffer: 80 KiB"]),
-            new ProcessTemplate(2, "Navegador Web", 608, ["Motor JS: 240 KiB", "Renderizado: 200 KiB", "Cache: 168 KiB"]),
-            new ProcessTemplate(3, "Base de Datos", 408, ["Engine: 136 KiB", "Índices: 136 KiB", "Buffer: 136 KiB"]),
-            new ProcessTemplate(4, "Compilador", 208, ["Parser: 70 KiB", "Optimizador: 68 KiB", "Generador: 70 KiB"]),
-            new ProcessTemplate(5, "Sistema Gráfico", 708, ["Drivers: 236 KiB", "OpenGL: 236 KiB", "Texturas: 236 KiB"]),
-            new ProcessTemplate(6, "Servidor Grande", 1308, ["Sistema: 436 KiB", "Cache: 436 KiB", "Buffers: 436 KiB"]),
-            new ProcessTemplate(7, "Sistema Masivo", 3508, ["Kernel: 1169 KiB", "Drivers: 1169 KiB", "Buffers: 1170 KiB"]),
-            new ProcessTemplate(8, "Aplicación Enorme", 3908, ["Framework: 1302 KiB", "Datos: 1303 KiB", "Cache: 1303 KiB"])
+            new ProcessTemplate(1, "Editor de Texto", 320, ["text: 180 KiB", "data: 70 KiB", "bss: 70 KiB"]),
+            new ProcessTemplate(2, "Navegador Web", 608, ["text: 250 KiB", "data: 200 KiB", "bss: 158 KiB"]),
+            new ProcessTemplate(3, "Base de Datos", 408, ["text: 136 KiB", "data: 180 KiB", "bss: 92 KiB"]),
+            new ProcessTemplate(4, "Compilador", 208, ["text: 100 KiB", "data: 54 KiB", "bss: 54 KiB"]),
+            new ProcessTemplate(5, "Sistema Gráfico", 708, ["text: 250 KiB", "data: 250 KiB", "bss: 208 KiB"]),
+            new ProcessTemplate(6, "Servidor Grande", 1308, ["text: 350 KiB", "data: 500 KiB", "bss: 458 KiB"]),
+            new ProcessTemplate(7, "Sistema Masivo", 3508, ["text: 1200 KiB", "data: 1200 KiB", "bss: 1108 KiB"]),
+            new ProcessTemplate(8, "Aplicación Enorme", 3908, ["text: 1000 KiB", "data: 1500 KiB", "bss: 1408 KiB"])
         ];
         this.nextProcessId = 9;
 
@@ -427,14 +427,14 @@ class StaticFixedMemorySimulator {
         // Resetear a solo los templates predeterminados
         this.processes = [];
         this.processTemplates = [
-            new ProcessTemplate(1, "Editor de Texto", 320, ["Código: 160 KiB", "Datos: 80 KiB", "Buffer: 80 KiB"]),
-            new ProcessTemplate(2, "Navegador Web", 608, ["Motor JS: 240 KiB", "Renderizado: 200 KiB", "Cache: 168 KiB"]),
-            new ProcessTemplate(3, "Base de Datos", 408, ["Engine: 136 KiB", "Índices: 136 KiB", "Buffer: 136 KiB"]),
-            new ProcessTemplate(4, "Compilador", 208, ["Parser: 70 KiB", "Optimizador: 68 KiB", "Generador: 70 KiB"]),
-            new ProcessTemplate(5, "Sistema Gráfico", 708, ["Drivers: 236 KiB", "OpenGL: 236 KiB", "Texturas: 236 KiB"]),
-            new ProcessTemplate(6, "Servidor Grande", 1308, ["Sistema: 436 KiB", "Cache: 436 KiB", "Buffers: 436 KiB"]),
-            new ProcessTemplate(7, "Sistema Masivo", 3508, ["Kernel: 1169 KiB", "Drivers: 1169 KiB", "Buffers: 1170 KiB"]),
-            new ProcessTemplate(8, "Aplicación Enorme", 3908, ["Framework: 1302 KiB", "Datos: 1303 KiB", "Cache: 1303 KiB"])
+            new ProcessTemplate(1, "Editor de Texto", 320, ["text: 180 KiB", "data: 70 KiB", "bss: 70 KiB"]),
+            new ProcessTemplate(2, "Navegador Web", 608, ["text: 250 KiB", "data: 200 KiB", "bss: 158 KiB"]),
+            new ProcessTemplate(3, "Base de Datos", 408, ["text: 136 KiB", "data: 180 KiB", "bss: 92 KiB"]),
+            new ProcessTemplate(4, "Compilador", 208, ["text: 100 KiB", "data: 54 KiB", "bss: 54 KiB"]),
+            new ProcessTemplate(5, "Sistema Gráfico", 708, ["text: 250 KiB", "data: 250 KiB", "bss: 208 KiB"]),
+            new ProcessTemplate(6, "Servidor Grande", 1308, ["text: 350 KiB", "data: 500 KiB", "bss: 458 KiB"]),
+            new ProcessTemplate(7, "Sistema Masivo", 3508, ["text: 1200 KiB", "data: 1200 KiB", "bss: 1108 KiB"]),
+            new ProcessTemplate(8, "Aplicación Enorme", 3908, ["text: 1000 KiB", "data: 1500 KiB", "bss: 1408 KiB"])
         ];
         this.nextProcessId = 9;
         

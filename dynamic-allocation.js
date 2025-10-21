@@ -23,14 +23,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Procesos predeterminados (tomados de las simulaciones estáticas)
     const predefinedProcesses = [
-        { name: "Editor de Texto", baseSize: 320, segments: ["Código: 160 KiB", "Datos: 80 KiB", "Buffer: 80 KiB"] },
-        { name: "Navegador Web", baseSize: 608, segments: ["Motor JS: 240 KiB", "Renderizado: 200 KiB", "Cache: 168 KiB"] },
-        { name: "Base de Datos", baseSize: 408, segments: ["Engine: 136 KiB", "Índices: 136 KiB", "Buffer: 136 KiB"] },
-        { name: "Compilador", baseSize: 208, segments: ["Parser: 70 KiB", "Optimizador: 68 KiB", "Generador: 70 KiB"] },
-        { name: "Sistema Gráfico", baseSize: 708, segments: ["Drivers: 236 KiB", "OpenGL: 236 KiB", "Texturas: 236 KiB"] },
-        { name: "Servidor Grande", baseSize: 1308, segments: ["Sistema: 436 KiB", "Cache: 436 KiB", "Buffers: 436 KiB"] },
-        { name: "Sistema Masivo", baseSize: 3508, segments: ["Kernel: 1169 KiB", "Drivers: 1169 KiB", "Buffers: 1170 KiB"] },
-        { name: "Aplicación Enorme", baseSize: 3908, segments: ["Framework: 1302 KiB", "Datos: 1303 KiB", "Cache: 1303 KiB"] }
+        { name: "Editor de Texto", baseSize: 320, segments: ["text: 180 KiB", "data: 70 KiB", "bss: 70 KiB"] },
+        { name: "Navegador Web", baseSize: 608, segments: ["text: 250 KiB", "data: 200 KiB", "bss: 158 KiB"] },
+        { name: "Base de Datos", baseSize: 408, segments: ["text: 136 KiB", "data: 180 KiB", "bss: 92 KiB"] },
+        { name: "Compilador", baseSize: 208, segments: ["text: 100 KiB", "data: 54 KiB", "bss: 54 KiB"] },
+        { name: "Sistema Gráfico", baseSize: 708, segments: ["text: 250 KiB", "data: 250 KiB", "bss: 208 KiB"] },
+        { name: "Servidor Grande", baseSize: 1308, segments: ["text: 350 KiB", "data: 500 KiB", "bss: 458 KiB"] },
+        { name: "Sistema Masivo", baseSize: 3508, segments: ["text: 1200 KiB", "data: 1200 KiB", "bss: 1108 KiB"] },
+        { name: "Aplicación Enorme", baseSize: 3908, segments: ["text: 1000 KiB", "data: 1500 KiB", "bss: 1408 KiB"] }
     ];
 
     // ProcessTemplate: representa el tipo de proceso (plantilla)
