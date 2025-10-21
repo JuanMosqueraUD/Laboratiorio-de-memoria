@@ -246,7 +246,31 @@ document.addEventListener('DOMContentLoaded', () => {
             processTemplates.push(template);
         });
 
+        displayMemoryInfo();
         updateUI();
+    }
+
+    function displayMemoryInfo() {
+        const memoryInfoEl = document.getElementById('memoryInfo');
+        if (memoryInfoEl) {
+            memoryInfoEl.innerHTML = `
+                <div class="memory-constants">
+                    <h3>Configuración de Memoria</h3>
+                    <div class="memory-detail">
+                        <span><strong>Heap por proceso:</strong></span>
+                        <span>${HEAP_SIZE} KiB</span>
+                    </div>
+                    <div class="memory-detail">
+                        <span><strong>Stack por proceso:</strong></span>
+                        <span>${STACK_SIZE} KiB</span>
+                    </div>
+                    <div class="memory-detail">
+                        <span><strong>Overhead total por proceso:</strong></span>
+                        <span>${HEAP_SIZE + STACK_SIZE} KiB</span>
+                    </div>
+                </div>
+            `;
+        }
     }
 
     function createCustomProcess() {

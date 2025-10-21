@@ -3,9 +3,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const OS_MEMORY = 1024; // 1024 KiB = 1 MiB
     const HEAP_SIZE = 128; // 128 KiB
     const STACK_SIZE = 64; // 64 KiB
+    
+    // Constantes de segmentación
+    const MAX_SEGMENTS_PER_PROCESS = 32; // 2^5 = 32 segmentos
+    const MAX_SEGMENT_SIZE = 512; // 2^19 bytes = 512 KiB
+    const SEGMENT_NUMBER_BITS = 5;
+    const OFFSET_BITS = 19;
 
     let memoryBlocks = [];
     let processes = [];
+    let processTemplates = [];
     let nextProcessId = 1;
 
     // DOM Elements
@@ -19,25 +26,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const fragmentationEl = document.getElementById('fragmentation');
     const largestFreeBlockEl = document.getElementById('largestFreeBlock');
 
-    // Procesos predeterminados (tomados de las simulaciones estáticas)
+    // Procesos predeterminados con tamaños específicos para cada sección
     const predefinedProcesses = [
-        { name: "Editor de Texto", baseSize: 320, segments: ["text: 180 KiB", "data: 70 KiB", "bss: 70 KiB"] },
-        { name: "Navegador Web", baseSize: 608, segments: ["text: 250 KiB", "data: 200 KiB", "bss: 158 KiB"] },
-        { name: "Base de Datos", baseSize: 408, segments: ["text: 136 KiB", "data: 180 KiB", "bss: 92 KiB"] },
-        { name: "Compilador", baseSize: 208, segments: ["text: 100 KiB", "data: 54 KiB", "bss: 54 KiB"] },
-        { name: "Sistema Gráfico", baseSize: 708, segments: ["text: 250 KiB", "data: 250 KiB", "bss: 208 KiB"] },
-        { name: "Servidor Grande", baseSize: 1308, segments: ["text: 350 KiB", "data: 500 KiB", "bss: 458 KiB"] },
-        { name: "Sistema Masivo", baseSize: 3508, segments: ["text: 1200 KiB", "data: 1200 KiB", "bss: 1108 KiB"] },
-        { name: "Aplicación Enorme", baseSize: 3908, segments: ["text: 1000 KiB", "data: 1500 KiB", "bss: 1408 KiB"] }
+        { name: "Editor de Texto", text: 180, data: 70, bss: 70 },
+        { name: "Navegador Web", text: 250, data: 200, bss: 158 },
+        { name: "Base de Datos", text: 136, data: 180, bss: 92 },
+        { name: "Compilador", text: 100, data: 54, bss: 54 },
+        { name: "Sistema Gráfico", text: 250, data: 250, bss: 208 },
+        { name: "Servidor Grande", text: 350, data: 500, bss: 458 },
+        { name: "Sistema Masivo", text: 600, data: 1000, bss: 1908 }, // text dividido en 2 segmentos
+        { name: "Aplicación Enorme", text: 1000, data: 1500, bss: 1408 } // text y data divididos
     ];
+
+    // Clase Segment: representa un segmento individual en memoria
+    class Segment {
+        constructor(processId, processName, type, size, segmentNumber) {
+            this.processId = processId;
+            this.processName = processName;
+            this.type = type; // '.text', '.data', '.bss', 'heap', 'stack'
+            this.size = size; // en KiB
+            this.segmentNumber = segmentNumber; // número de segmento dentro del proceso
+            this.memoryBlock = null; // bloque de memoria asignado
+        }
+
+        getLabel() {
+            if (this.segmentNumber > 0) {
+                return `P${this.processId} (${this.type}#${this.segmentNumber})`;
+            }
+            return `P${this.processId} (${this.type})`;
+        }
+    }
 
     // ProcessTemplate: representa el tipo de proceso (plantilla)
     class ProcessTemplate {
-        constructor(id, name, baseSize, segments = []) {
+        constructor(id, name, textSize, dataSize, bssSize) {
             this.id = id;
             this.name = name;
-            this.baseSize = baseSize;
-            this.segments = segments;
+            this.textSize = textSize;
+            this.dataSize = dataSize;
+            this.bssSize = bssSize;
             this.instances = []; // Array de instancias activas
         }
 
@@ -69,119 +96,175 @@ document.addEventListener('DOMContentLoaded', () => {
             this.id = id;
             this.template = template;
             this.name = template.name;
-            this.baseSize = template.baseSize; // KiB - tamaño base del programa
-            this.heapSize = HEAP_SIZE; // KiB
-            this.stackSize = STACK_SIZE; // KiB
-            this.size = template.baseSize + HEAP_SIZE + STACK_SIZE; // Tamaño total en KiB
-            this.segments = template.segments;
+            this.textSize = template.textSize;
+            this.dataSize = template.dataSize;
+            this.bssSize = template.bssSize;
+            this.heapSize = HEAP_SIZE;
+            this.stackSize = STACK_SIZE;
             this.isRunning = false;
-            this.memoryBlock = null;
+            this.segments = []; // Array de objetos Segment
+            this.totalSize = 0;
+            
+            // Crear segmentos dividiendo las secciones si exceden MAX_SEGMENT_SIZE
+            this.createSegments();
+        }
+
+        createSegments() {
+            this.segments = [];
+            let segmentCount = 0;
+
+            // Función auxiliar para dividir una sección en segmentos
+            const createSegmentsForSection = (type, size) => {
+                if (size === 0) return;
+                
+                let remaining = size;
+                let partNumber = 0;
+                
+                while (remaining > 0 && segmentCount < MAX_SEGMENTS_PER_PROCESS) {
+                    const segmentSize = Math.min(remaining, MAX_SEGMENT_SIZE);
+                    const segment = new Segment(
+                        this.id,
+                        this.name,
+                        type,
+                        segmentSize,
+                        partNumber
+                    );
+                    this.segments.push(segment);
+                    this.totalSize += segmentSize;
+                    remaining -= segmentSize;
+                    partNumber++;
+                    segmentCount++;
+                }
+                
+                if (remaining > 0) {
+                    console.warn(`Proceso ${this.name} excede el límite de ${MAX_SEGMENTS_PER_PROCESS} segmentos`);
+                }
+            };
+
+            // Crear segmentos para cada sección
+            createSegmentsForSection('.text', this.textSize);
+            createSegmentsForSection('.data', this.dataSize);
+            createSegmentsForSection('.bss', this.bssSize);
+            createSegmentsForSection('heap', this.heapSize);
+            createSegmentsForSection('stack', this.stackSize);
         }
 
         start() {
-            if (!this.isRunning && !this.memoryBlock) {
+            if (!this.isRunning) {
                 return this.allocateMemory();
             }
             return false;
         }
 
         stop() {
-            if (this.isRunning && this.memoryBlock) {
+            if (this.isRunning) {
                 this.deallocateMemory();
                 return true;
             }
             return false;
         }
 
-        getMemoryBreakdown() {
-            return {
-                base: this.baseSize,
-                heap: this.heapSize,
-                stack: this.stackSize,
-                total: this.size
-            };
-        }
-
         allocateMemory() {
-            let allocated = false;
+            let allAllocated = true;
 
-            // --- Best-Fit Algorithm ---
-            const freeBlocks = memoryBlocks.filter(b => b.isFree && b.size >= this.size);
-            
-            if (freeBlocks.length > 0) {
-                // Find the smallest block that fits
-                freeBlocks.sort((a, b) => a.size - b.size);
-                const bestFitBlock = freeBlocks[0];
-                this.assignToBlock(bestFitBlock);
-                allocated = true;
+            // Intentar asignar cada segmento usando Best-Fit
+            for (const segment of this.segments) {
+                const allocated = this.allocateSegment(segment);
+                if (!allocated) {
+                    allAllocated = false;
+                    // Si falla, liberar los segmentos ya asignados
+                    this.deallocateMemory();
+                    alert(`No se pudo asignar memoria para el segmento ${segment.getLabel()} (${segment.size} KiB). Proceso cancelado.`);
+                    break;
+                }
             }
 
-            if (allocated) {
+            if (allAllocated) {
                 this.isRunning = true;
-            } else {
-                alert(`No se pudo asignar memoria para el proceso "${this.name}" de ${this.size} KiB. No hay suficiente espacio contiguo.`);
             }
 
-            return allocated;
+            return allAllocated;
         }
 
-        assignToBlock(block) {
-            const originalSize = block.size;
-            const remainingSize = originalSize - this.size;
+        allocateSegment(segment) {
+            // Best-Fit: buscar el bloque libre más pequeño que quepa el segmento
+            const freeBlocks = memoryBlocks.filter(b => b.isFree && b.size >= segment.size);
+            
+            if (freeBlocks.length === 0) {
+                return false;
+            }
 
-            // Update the block to be the new process
-            block.size = this.size;
+            // Ordenar por tamaño (Best-Fit)
+            freeBlocks.sort((a, b) => a.size - b.size);
+            const bestFitBlock = freeBlocks[0];
+
+            return this.assignSegmentToBlock(segment, bestFitBlock);
+        }
+
+        assignSegmentToBlock(segment, block) {
+            const originalSize = block.size;
+            const remainingSize = originalSize - segment.size;
+
+            // Actualizar el bloque para el segmento
+            block.size = segment.size;
             block.isFree = false;
             block.processId = `P${this.id}`;
             block.processName = this.name;
-            block.process = this;
-            this.memoryBlock = block;
+            block.segment = segment;
+            segment.memoryBlock = block;
 
-            // If there's remaining space, create a new free block
+            // Si queda espacio restante, crear un nuevo bloque libre
             if (remainingSize > 0) {
                 const newFreeBlock = {
-                    id: `free-${Date.now()}`,
+                    id: `free-${Date.now()}-${Math.random()}`,
                     size: remainingSize,
-                    startAddress: block.startAddress + this.size,
+                    startAddress: block.startAddress + segment.size,
                     isFree: true,
                 };
                 const blockIndex = memoryBlocks.findIndex(b => b.id === block.id);
                 memoryBlocks.splice(blockIndex + 1, 0, newFreeBlock);
             }
+
+            return true;
         }
 
         deallocateMemory() {
-            if (!this.memoryBlock) return;
+            // Liberar todos los segmentos del proceso
+            for (const segment of this.segments) {
+                if (segment.memoryBlock) {
+                    this.deallocateSegment(segment);
+                }
+            }
+            this.isRunning = false;
+        }
 
-            const blockIndex = memoryBlocks.findIndex(b => b === this.memoryBlock);
+        deallocateSegment(segment) {
+            if (!segment.memoryBlock) return;
+
+            const block = segment.memoryBlock;
+            const blockIndex = memoryBlocks.findIndex(b => b === block);
             if (blockIndex === -1) return;
 
-            this.memoryBlock.isFree = true;
-            this.memoryBlock.processId = undefined;
-            this.memoryBlock.processName = undefined;
-            this.memoryBlock.process = null;
+            // Marcar el bloque como libre
+            block.isFree = true;
+            block.processId = undefined;
+            block.processName = undefined;
+            block.segment = null;
+            segment.memoryBlock = null;
 
-            // Merge with next block if it's free
+            // Fusionar con el bloque siguiente si es libre
             if (blockIndex + 1 < memoryBlocks.length && memoryBlocks[blockIndex + 1].isFree) {
-                const blockToMerge = memoryBlocks[blockIndex + 1];
-                this.memoryBlock.size += blockToMerge.size;
+                block.size += memoryBlocks[blockIndex + 1].size;
                 memoryBlocks.splice(blockIndex + 1, 1);
             }
 
-            // Merge with previous block if it's free
+            // Fusionar con el bloque anterior si es libre
             if (blockIndex > 0 && memoryBlocks[blockIndex - 1].isFree) {
-                const blockToMerge = this.memoryBlock;
-                memoryBlocks[blockIndex - 1].size += blockToMerge.size;
+                memoryBlocks[blockIndex - 1].size += block.size;
                 memoryBlocks.splice(blockIndex, 1);
             }
-
-            this.memoryBlock = null;
-            this.isRunning = false;
         }
     }
-
-    // Templates de procesos disponibles
-    let processTemplates = [];
 
     function init() {
         // Reset state
@@ -209,11 +292,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Crear templates de procesos predeterminados
         predefinedProcesses.forEach((procData, index) => {
-            const template = new ProcessTemplate(index + 1, procData.name, procData.baseSize, procData.segments);
+            const template = new ProcessTemplate(
+                index + 1, 
+                procData.name, 
+                procData.text,
+                procData.data,
+                procData.bss
+            );
             processTemplates.push(template);
         });
 
+        displayMemoryInfo();
         updateUI();
+    }
+
+    function displayMemoryInfo() {
+        const memoryInfoEl = document.getElementById('memoryInfo');
+        if (memoryInfoEl) {
+            memoryInfoEl.innerHTML = `
+                <div class="memory-constants">
+                    <h3>Configuración de Memoria</h3>
+                    <div class="memory-detail">
+                        <span><strong>Heap por proceso:</strong></span>
+                        <span>${HEAP_SIZE} KiB</span>
+                    </div>
+                    <div class="memory-detail">
+                        <span><strong>Stack por proceso:</strong></span>
+                        <span>${STACK_SIZE} KiB</span>
+                    </div>
+                    <div class="memory-detail">
+                        <span><strong>Overhead total por proceso:</strong></span>
+                        <span>${HEAP_SIZE + STACK_SIZE} KiB</span>
+                    </div>
+                </div>
+            `;
+        }
     }
 
     function createCustomProcess() {
@@ -225,11 +338,17 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Distribuir el tamaño base entre las secciones (aproximadamente)
+        const textSize = Math.floor(baseSize * 0.4); // 40% para .text
+        const dataSize = Math.floor(baseSize * 0.3); // 30% para .data
+        const bssSize = baseSize - textSize - dataSize; // El resto para .bss
+
         const newTemplate = new ProcessTemplate(
             processTemplates.length + 1, 
             name, 
-            baseSize, 
-            [`Tamaño base: ${baseSize}KiB`, `Heap: ${HEAP_SIZE}KiB`, `Stack: ${STACK_SIZE}KiB`]
+            textSize,
+            dataSize,
+            bssSize
         );
         processTemplates.push(newTemplate);
 
@@ -267,20 +386,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderMemoryBar() {
         memoryBarContainer.innerHTML = '';
+        
+        let currentAddress = 0;
+        
         memoryBlocks.forEach(block => {
             const blockDiv = document.createElement('div');
-            blockDiv.className = 'memory-block';
-            blockDiv.style.width = `${(block.size / TOTAL_MEMORY) * 100}%`;
+            blockDiv.className = 'memory-block-vertical';
 
             let blockClass = 'free-dynamic';
+            let label = 'Espacio Libre';
+            
             if (!block.isFree) {
                 blockClass = block.id === 'os' ? 'os' : 'occupied-dynamic';
+                
+                if (block.segment) {
+                    // Mostrar etiqueta del segmento: "P2 (.text)"
+                    label = block.segment.getLabel();
+                } else if (block.id === 'os') {
+                    label = 'Sistema Operativo';
+                } else {
+                    label = block.processId || 'Ocupado';
+                }
             }
+            
             blockDiv.classList.add(blockClass);
             
-            blockDiv.title = `${block.processId || 'Libre'}${block.processName ? ` - ${block.processName}` : ''}: ${block.size} KiB`;
-            blockDiv.textContent = block.processId || '';
+            // Calcular altura proporcional al tamaño (mínimo 30px)
+            const heightPercentage = (block.size / TOTAL_MEMORY) * 100;
+            const minHeight = 35;
+            const calculatedHeight = Math.max(minHeight, (block.size / TOTAL_MEMORY) * 600);
+            blockDiv.style.height = `${calculatedHeight}px`;
+            
+            // Formatear dirección en hexadecimal
+            const startAddr = block.startAddress || currentAddress;
+            const endAddr = startAddr + block.size - 1;
+            const startHex = '0x' + startAddr.toString(16).toUpperCase().padStart(6, '0');
+            const endHex = '0x' + endAddr.toString(16).toUpperCase().padStart(6, '0');
+            
+            blockDiv.innerHTML = `
+                <span class="segment-label">${label}</span>
+                <span class="segment-size">${block.size} KiB</span>
+                <span class="segment-address">${startHex}</span>
+            `;
+            
+            blockDiv.title = `${label}\nTamaño: ${block.size} KiB\nRango: ${startHex} - ${endHex}`;
+            
             memoryBarContainer.appendChild(blockDiv);
+            currentAddress = endAddr + 1;
         });
     }
 
@@ -291,21 +443,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const div = document.createElement('div');
             div.className = 'process-item';
             
-            // Determinar si el proceso es demasiado grande para la memoria disponible
-            const processSize = template.baseSize + HEAP_SIZE + STACK_SIZE;
-            const maxFreeMemory = Math.max(
-                ...memoryBlocks.filter(b => b.isFree).map(b => b.size),
-                0
-            );
-            
-            const canFit = processSize <= maxFreeMemory;
-            
             const runningCount = template.getInstanceCount();
             const hasInstances = runningCount > 0;
             
-            if (!canFit && !hasInstances) {
-                div.classList.add('too-large');
-            }
+            // Calcular tamaño total del proceso
+            const totalSize = template.textSize + template.dataSize + template.bssSize + HEAP_SIZE + STACK_SIZE;
+            
+            // Calcular número de segmentos
+            const calculateSegmentCount = () => {
+                let count = 0;
+                count += Math.ceil(template.textSize / MAX_SEGMENT_SIZE);
+                count += Math.ceil(template.dataSize / MAX_SEGMENT_SIZE);
+                count += Math.ceil(template.bssSize / MAX_SEGMENT_SIZE);
+                count += Math.ceil(HEAP_SIZE / MAX_SEGMENT_SIZE);
+                count += Math.ceil(STACK_SIZE / MAX_SEGMENT_SIZE);
+                return count;
+            };
+            
+            const segmentCount = calculateSegmentCount();
             
             div.innerHTML = `
                 <div class="process-header">
@@ -315,16 +470,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 <div class="process-details">
-                    <div><strong>Tamaño base:</strong> ${template.baseSize} KiB</div>
+                    <div><strong>.text:</strong> ${template.textSize} KiB</div>
+                    <div><strong>.data:</strong> ${template.dataSize} KiB</div>
+                    <div><strong>.bss:</strong> ${template.bssSize} KiB</div>
                     <div><strong>Heap:</strong> ${HEAP_SIZE} KiB</div>
                     <div><strong>Stack:</strong> ${STACK_SIZE} KiB</div>
-                    <div><strong>Total:</strong> ${processSize} KiB</div>
-                    <div><strong>Instancias:</strong> ${runningCount}</div>
-                    <div style="grid-column: span 3"><strong>Segmentos:</strong> ${template.segments.join(', ')}</div>
+                    <div><strong>Total:</strong> ${totalSize} KiB</div>
+                    <div style="grid-column: span 3"><strong>Segmentos:</strong> ${segmentCount} (máx ${MAX_SEGMENT_SIZE} KiB c/u)</div>
+                    <div style="grid-column: span 3"><strong>Instancias activas:</strong> ${runningCount}</div>
                 </div>
                 <div class="process-controls">
-                    <button class="btn start" onclick="startProcess(${template.id})" 
-                            ${!canFit ? 'disabled' : ''}>
+                    <button class="btn start" onclick="startProcess(${template.id})">
                         Iniciar
                     </button>
                     <button class="btn stop" onclick="stopProcess(${template.id})"

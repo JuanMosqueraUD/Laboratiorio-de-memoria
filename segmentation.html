@@ -31,9 +31,9 @@
             <div class="simulation-content">
                 <div class="left-panel">
                     <div class="memory-visualization">
-                        <h2>Memoria Principal (16 MiB)</h2>
-                        <div class="memory-bar-container" id="memoryBarContainer">
-                            <!-- La barra de memoria se generará dinámicamente -->
+                        <h2>Memoria Principal (16 MiB) - Vista de Segmentos</h2>
+                        <div class="memory-bar-container-vertical" id="memoryBarContainer">
+                            <!-- La visualización de segmentos se generará dinámicamente -->
                         </div>
                         <div class="legend">
                             <div class="legend-item">
@@ -130,20 +130,8 @@
                             </ul>
                         </div>
                         
-                        <div class="memory-info" id="memoryInfo">
-                            <h3>Gestión de Memoria por Proceso</h3>
-                            <div class="memory-detail">
-                                <span><strong>Tamaño del Heap por proceso:</strong></span>
-                                <span>128 KiB</span>
-                            </div>
-                            <div class="memory-detail">
-                                <span><strong>Tamaño del Stack por proceso:</strong></span>
-                                <span>64 KiB</span>
-                            </div>
-                            <div class="memory-detail">
-                                <span><strong>Overhead total por proceso:</strong></span>
-                                <span>192 KiB</span>
-                            </div>
+                        <div id="memoryInfo" class="memory-info-section">
+                            <!-- La información de heap y stack se insertará aquí -->
                         </div>
                     </div>
                 </div>
