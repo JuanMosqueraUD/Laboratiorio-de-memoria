@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asignación Dinámica - Simulador de Memoria</title>
+    <title>Segmentación - Simulador de Memoria</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Simulador de Memoria - Asignación Dinámica</h1>
-            <p>Memoria de 16 MiB con asignación dinámica y compactación opcional</p>
+            <h1>Simulador de Memoria - Segmentación</h1>
+            <p>Memoria de 16 MiB con segmentación dinámica</p>
         </header>
 
         <!-- Navegación -->
@@ -18,20 +18,14 @@
             <a href="index.html" class="nav-btn">Inicio</a>
             <a href="static-fixed.html" class="nav-btn">Particiones Estáticas Fijas</a>
             <a href="static-variable.html" class="nav-btn">Particiones Estáticas Variables</a>
-            <a href="dynamic-allocation.html" class="nav-btn active">Particiones Dinámicas</a>
-            <a href="segmentation.html" class="nav-btn">Segmentación</a>
+            <a href="dynamic-allocation.html" class="nav-btn">Particiones Dinámicas</a>
+            <a href="segmentation.html" class="nav-btn active">Segmentación</a>
         </nav>
 
         <div class="view-container">
             <div class="view-header">
-                <h2>Asignación Dinámica con Algoritmo "Mejor Ajuste"</h2>
-                <div class="controls-group">
-                    <label for="compactionToggle">Modo de Operación:</label>
-                    <select id="compactionToggle" class="control-input">
-                        <option value="best-fit">Sin Compactación (Mejor Ajuste)</option>
-                        <option value="compaction">Con Compactación</option>
-                    </select>
-                </div>
+                <h2>Segmentación con Algoritmo "Mejor Ajuste"</h2>
+                <p>Dirección lógica de 24 bits: 5 bits de Número de segmento + 19 bits de Offset</p>
             </div>
 
             <div class="simulation-content">
@@ -48,35 +42,17 @@
                             </div>
                             <div class="legend-item">
                                 <span class="color-box occupied-dynamic"></span>
-                                <span>Proceso Ocupado</span>
+                                <span>Segmento Ocupado</span>
                             </div>
                             <div class="legend-item">
                                 <span class="color-box free-dynamic"></span>
                                 <span>Espacio Libre</span>
                             </div>
                         </div>
-                        
-                        <!-- Tabla de Procesos -->
-                        <div class="partition-table-container">
-                            <h3>Tabla de Procesos</h3>
-                            <table class="partition-table" id="processTable">
-                                <thead>
-                                    <tr>
-                                        <th>PID</th>
-                                        <th>Nombre</th>
-                                        <th>Base (KiB)</th>
-                                        <th>Tamaño (KiB)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="processTableBody">
-                                    <!-- Las filas se generarán dinámicamente -->
-                                </tbody>
-                            </table>
-                        </div>
 
-                        <!-- Tabla de Fragmentos Libres -->
+                        <!-- Tabla de Segmentos -->
                         <div class="partition-table-container">
-                            <h3>Tabla de Fragmentos Libres</h3>
+                            <h3>Tabla de Segmentos</h3>
                             <table class="partition-table" id="freeFragmentsTable">
                                 <thead>
                                     <tr>
@@ -89,7 +65,7 @@
                                 </tbody>
                             </table>
                             <div class="empty-table-message" id="freeFragmentsTableEmpty">
-                                No hay fragmentos libres
+                                No hay segmentos libres
                             </div>
                         </div>
                     </div>
@@ -128,7 +104,7 @@
                             </div>
                             <div class="info-item">
                                 <span class="label">Tipo:</span>
-                                <span class="value">Asignación Dinámica</span>
+                                <span class="value">Segmentación</span>
                             </div>
                             <div class="info-item">
                                 <span class="label">Memoria Libre Total:</span>
@@ -146,11 +122,11 @@
                         <div class="system-notes">
                             <h3>Características:</h3>
                             <ul>
-                                <li>Asignación <strong>exacta</strong> del tamaño solicitado</li>
+                                <li>Asignación por <strong>segmentos</strong> (text, data, bss)</li>
                                 <li>Algoritmo <strong>Mejor Ajuste</strong> (Best Fit)</li>
                                 <li>Compactación opcional para <strong>reducir fragmentación</strong></li>
                                 <li><strong>Compactación automática</strong> al liberar procesos (modo compactación)</li>
-                                <li>Sin límite de tamaño por proceso</li>
+                                <li>Sin límite de tamaño por segmento</li>
                             </ul>
                         </div>
                         
@@ -175,6 +151,6 @@
         </div>
     </div>
 
-    <script src="dynamic-allocation.js"></script>
+    <script src="segmentation.js"></script>
 </body>
 </html>
