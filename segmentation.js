@@ -382,6 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderMemoryBar();
         renderProcesses();
         updateSystemInfo();
+        renderSegmentTables();
     }
 
     function renderMemoryBar() {
@@ -490,6 +491,78 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
             processList.appendChild(div);
+        });
+    }
+    
+    function renderSegmentTables() {
+        const container = document.getElementById('segmentTablesContainer');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        // Obtener todas las instancias de procesos activas
+        const activeProcesses = processes.filter(p => p.isRunning);
+        
+        if (activeProcesses.length === 0) {
+            container.innerHTML = '<div class="empty-table-message show">No hay procesos activos con segmentos</div>';
+            return;
+        }
+        
+        // Crear una tabla para cada proceso
+        activeProcesses.forEach(process => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'segment-table-wrapper';
+            
+            const title = document.createElement('div');
+            title.className = 'segment-table-title';
+            title.textContent = `P${process.id} - ${process.name}`;
+            wrapper.appendChild(title);
+            
+            const table = document.createElement('table');
+            table.className = 'segment-table';
+            
+            // Crear encabezado
+            const thead = document.createElement('thead');
+            thead.innerHTML = `
+                <tr>
+                    <th rowspan="2" class="main-header">Número</th>
+                    <th rowspan="2" class="main-header">Tipo</th>
+                    <th colspan="2" class="main-header">Base</th>
+                    <th colspan="2" class="main-header">Límite</th>
+                </tr>
+                <tr>
+                    <th class="sub-header">Dec</th>
+                    <th class="sub-header">Hex</th>
+                    <th class="sub-header">Dec</th>
+                    <th class="sub-header">Hex</th>
+                </tr>
+            `;
+            table.appendChild(thead);
+            
+            // Crear cuerpo de la tabla
+            const tbody = document.createElement('tbody');
+            
+            process.segments.forEach((segment, index) => {
+                if (!segment.memoryBlock) return; // Saltar segmentos no asignados
+                
+                const base = segment.memoryBlock.startAddress;
+                const limit = segment.size;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="dec-value">${index}</td>
+                    <td class="segment-type">${segment.type}${segment.segmentNumber > 0 ? '#' + segment.segmentNumber : ''}</td>
+                    <td class="dec-value">${base}</td>
+                    <td class="hex-value">0x${base.toString(16).toUpperCase().padStart(6, '0')}</td>
+                    <td class="dec-value">${limit}</td>
+                    <td class="hex-value">0x${limit.toString(16).toUpperCase().padStart(6, '0')}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            table.appendChild(tbody);
+            wrapper.appendChild(table);
+            container.appendChild(wrapper);
         });
     }
     

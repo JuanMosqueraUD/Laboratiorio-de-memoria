@@ -1074,3 +1074,82 @@ header p {
     border-left: 4px solid #FFBF78;
     color: #7B4019;
 }
+
+/* Tablas de Segmentos */
+#segmentTablesContainer {
+    margin-top: 20px;
+}
+
+.segment-table-wrapper {
+    margin-bottom: 30px;
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.segment-table-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #7B4019;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #FF7D29;
+}
+
+.segment-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.9rem;
+}
+
+.segment-table thead {
+    background: #FF7D29;
+    color: white;
+}
+
+.segment-table th {
+    padding: 10px 8px;
+    text-align: center;
+    font-weight: bold;
+    border: 1px solid #e5691f;
+}
+
+.segment-table th.main-header {
+    background: #FF7D29;
+}
+
+.segment-table th.sub-header {
+    background: #FF9D4D;
+    font-size: 0.85rem;
+    padding: 6px 4px;
+}
+
+.segment-table td {
+    padding: 8px;
+    text-align: center;
+    border: 1px solid #ddd;
+    background: white;
+}
+
+.segment-table tbody tr:hover {
+    background: #FFF5E6;
+}
+
+.segment-table .segment-type {
+    font-family: monospace;
+    font-weight: bold;
+    color: #7B4019;
+}
+
+.segment-table .hex-value {
+    font-family: monospace;
+    color: #555;
+}
+
+.segment-table .dec-value {
+    font-family: monospace;
+    color: #333;
+}
+
