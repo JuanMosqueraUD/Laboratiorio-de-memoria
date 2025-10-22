@@ -201,13 +201,14 @@ header p {
 
 /* Colores mejorados para particiones */
 .variable-partition.reserved {
-    background: #FFBF78;
-    border-color: #FF7D29;
+    background: #7B4019;
+    border-color: #5d2f12;
+    color: white;
 }
 
 .color-box.reserved {
-    background: #FFBF78;
-    border: 1px solid #FF7D29;
+    background: #7B4019;
+    border: 1px solid #5d2f12;
 }
 
 .variable-partition.free {
@@ -221,8 +222,9 @@ header p {
 }
 
 .variable-partition.reserved {
-    background: #FFBF78;
-    border-color: #FF7D29;
+    background: #7B4019;
+    border-color: #5d2f12;
+    color: white;
     opacity: 0.8;
 }
 
@@ -239,6 +241,11 @@ header p {
     background: rgba(255, 255, 255, 0.8);
     padding: 1px 3px;
     border-radius: 2px;
+}
+
+.variable-partition.reserved .partition-size-label {
+    background: rgba(93, 47, 18, 0.8);
+    color: white;
 }
 
 .partition-id {
@@ -277,6 +284,12 @@ header p {
 .partition.occupied {
     background: #FFBF78;
     border-color: #FF7D29;
+}
+
+.partition.os {
+    background: #7B4019;
+    border-color: #5d2f12;
+    color: white;
 }
 
 .partition:hover {
@@ -327,6 +340,11 @@ header p {
 .color-box.occupied {
     background: #FFBF78;
     border-color: #FF7D29;
+}
+
+.color-box.os {
+    background: #7B4019;
+    border-color: #5d2f12;
 }
 
 /* Panel derecho - Procesos */

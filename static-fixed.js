@@ -194,7 +194,9 @@ class StaticFixedMemorySimulator {
         
         this.partitions.forEach(partition => {
             const div = document.createElement('div');
-            div.className = `partition ${partition.isOccupied ? 'occupied' : 'free'}`;
+            // Agregar clase 'os' para la partición del sistema operativo (P0)
+            const isOS = partition.id === 0 && partition.isOccupied;
+            div.className = `partition ${isOS ? 'os' : (partition.isOccupied ? 'occupied' : 'free')}`;
             div.innerHTML = `
                 <div class="partition-label">P${partition.id}</div>
                 <div class="partition-address">${partition.getAddressHex()}</div>
