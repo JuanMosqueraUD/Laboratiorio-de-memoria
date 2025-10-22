@@ -706,7 +706,7 @@ header p {
 }
 
 .color-box.free-dynamic, .memory-block.free-dynamic {
-    background: white; /* Blanco para libre */
+    background: #FFEEA9; /* Amarillo para libre */
     border-color: #FFBF78;
     color: #7B4019;
 }
@@ -1061,17 +1061,14 @@ header p {
 
 .memory-block-vertical.os {
     background: #7B4019;
-    border-left: 4px solid #5d2f12;
 }
 
 .memory-block-vertical.occupied-dynamic {
     background: #FF7D29;
-    border-left: 4px solid #e5691f;
 }
 
 .memory-block-vertical.free-dynamic {
     background: #FFEEA9;
-    border-left: 4px solid #FFBF78;
     color: #7B4019;
 }
 
