@@ -37,6 +37,12 @@
                     <p>Gestión de memoria mediante segmentos (text, data, bss) con asignación dinámica.</p>
                     <a href="segmentation.html" class="btn primary">Acceder</a>
                 </div>
+
+                <div class="option-card">
+                    <h3>Paginación</h3>
+                    <p>Gestión de memoria mediante páginas de tamaño fijo con algoritmo LRU.</p>
+                    <a href="paging.html" class="btn primary">Acceder</a>
+                </div>
             </div>
         </div>
     </div>
@@ -52,6 +58,13 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
+        }
+
+        /* Ajuste para 5 tarjetas: disposición asimétrica */
+        .simulation-options > .option-card:nth-child(5) {
+            grid-column: span 2;
+            max-width: 400px;
+            margin: 0 auto;
         }
 
         .option-card {

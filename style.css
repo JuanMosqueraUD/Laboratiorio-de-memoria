@@ -1168,3 +1168,16 @@ header p {
     color: #333;
 }
 
+/* Estilos específicos para paginación */
+.segment-table .present {
+    background-color: #d4edda;
+    color: #155724;
+    font-weight: bold;
+}
+
+.segment-table .not-present {
+    background-color: #f8d7da;
+    color: #721c24;
+    font-weight: bold;
+}
+

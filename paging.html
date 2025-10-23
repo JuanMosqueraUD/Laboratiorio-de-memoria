@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Segmentación - Simulador de Memoria</title>
+    <title>Paginación - Simulador de Memoria</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Simulador de Memoria - Segmentación</h1>
-            <p>Memoria de 16 MiB con segmentación dinámica</p>
+            <h1>Simulador de Memoria - Paginación</h1>
+            <p>Memoria de 16 MiB con paginación por demanda</p>
         </header>
 
         <!-- Navegación -->
@@ -19,22 +19,22 @@
             <a href="static-fixed.html" class="nav-btn">Particiones Estáticas Fijas</a>
             <a href="static-variable.html" class="nav-btn">Particiones Estáticas Variables</a>
             <a href="dynamic-allocation.html" class="nav-btn">Particiones Dinámicas</a>
-            <a href="segmentation.html" class="nav-btn active">Segmentación</a>
-            <a href="paging.html" class="nav-btn">Paginación</a>
+            <a href="segmentation.html" class="nav-btn">Segmentación</a>
+            <a href="paging.html" class="nav-btn active">Paginación</a>
         </nav>
 
         <div class="view-container">
             <div class="view-header">
-                <h2>Segmentación con Algoritmo "Mejor Ajuste"</h2>
-                <p>Dirección lógica de 24 bits: 5 bits de Número de segmento + 19 bits de Offset</p>
+                <h2>Paginación con Algoritmo "LRU" (Least Recently Used)</h2>
+                <p>Dirección lógica de 32 bits: 16 bits de Número de página + 16 bits de Offset</p>
             </div>
 
             <div class="simulation-content">
                 <div class="left-panel">
                     <div class="memory-visualization">
-                        <h2>Memoria Principal (16 MiB) - Vista de Segmentos</h2>
+                        <h2>Memoria Principal (16 MiB) - Vista de Páginas Físicas</h2>
                         <div class="memory-bar-container-vertical" id="memoryBarContainer">
-                            <!-- La visualización de segmentos se generará dinámicamente -->
+                            <!-- La visualización de páginas se generará dinámicamente -->
                         </div>
                         <div class="legend">
                             <div class="legend-item">
@@ -43,17 +43,17 @@
                             </div>
                             <div class="legend-item">
                                 <span class="color-box occupied-dynamic"></span>
-                                <span>Segmento Ocupado</span>
+                                <span>Página Ocupada</span>
                             </div>
                             <div class="legend-item">
                                 <span class="color-box free-dynamic"></span>
-                                <span>Espacio Libre</span>
+                                <span>Marco Libre</span>
                             </div>
                         </div>
 
-                        <!-- Tablas de Segmentos por Proceso -->
-                        <div id="segmentTablesContainer">
-                            <!-- Las tablas de segmentos se generarán dinámicamente -->
+                        <!-- Tablas de Páginas por Proceso -->
+                        <div id="pageTablesContainer">
+                            <!-- Las tablas de páginas se generarán dinámicamente -->
                         </div>
                     </div>
                 </div>
@@ -71,9 +71,9 @@
                                 <input type="text" id="processName" class="control-input" placeholder="Ej: Mi Aplicación">
                             </div>
                             <div class="form-group">
-                                <label for="processSize">Tamaño Base (KiB):</label>
-                                <input type="number" id="processSize" class="control-input" min="1" placeholder="Ej: 512">
-                                <small>El tamaño total incluirá 192 KiB adicionales (128 KiB heap + 64 KiB stack)</small>
+                                <label for="processSize">Tamaño del Proceso (KiB):</label>
+                                <input type="number" id="processSize" class="control-input" min="64" placeholder="Ej: 512">
+                                <small>Mínimo 64 KiB (1 página). Se redondea hacia arriba al número de páginas completas.</small>
                             </div>
                             <button id="addProcessBtn" class="btn start">Crear Proceso</button>
                         </div>
@@ -91,32 +91,37 @@
                             </div>
                             <div class="info-item">
                                 <span class="label">Tipo:</span>
-                                <span class="value">Segmentación</span>
+                                <span class="value">Paginación</span>
                             </div>
                             <div class="info-item">
-                                <span class="label">Memoria Libre Total:</span>
-                                <span class="value" id="totalFreeMemory">-- KiB</span>
+                                <span class="label">Tamaño de Página:</span>
+                                <span class="value" id="pageSize">64 KiB</span>
                             </div>
                             <div class="info-item">
-                                <span class="label">Fragmentación Externa:</span>
-                                <span class="value" id="fragmentation">-- KiB</span>
+                                <span class="label">Páginas Totales:</span>
+                                <span class="value" id="totalPages">256</span>
                             </div>
                             <div class="info-item">
-                                <span class="label">Bloque Libre Más Grande:</span>
-                                <span class="value" id="largestFreeBlock">-- KiB</span>
+                                <span class="label">Marcos Libres:</span>
+                                <span class="value" id="freeFrames">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Marcos Ocupados:</span>
+                                <span class="value" id="occupiedFrames">--</span>
                             </div>
                         </div>
                         <div class="system-notes">
                             <h3>Características:</h3>
                             <ul>
-                                <li>Asignación por <strong>segmentos</strong> (text, data, bss)</li>
-                                <li>Algoritmo <strong>Mejor Ajuste</strong> (Best Fit)</li>
-                                <li>Sin límite de tamaño por segmento</li>
+                                <li>Asignación por <strong>páginas</strong> de tamaño fijo</li>
+                                <li>Algoritmo <strong>LRU</strong> (Least Recently Used)</li>
+                                <li>Páginas de <strong>64 KiB</strong> cada una</li>
+                                <li>Direcciones virtuales de <strong>32 bits</strong></li>
                             </ul>
                         </div>
                         
                         <div id="memoryInfo" class="memory-info-section">
-                            <!-- La información de heap y stack se insertará aquí -->
+                            <!-- La información de paginación se insertará aquí -->
                         </div>
                     </div>
                 </div>
@@ -124,6 +129,6 @@
         </div>
     </div>
 
-    <script src="segmentation.js"></script>
+    <script src="paging.js"></script>
 </body>
 </html>
