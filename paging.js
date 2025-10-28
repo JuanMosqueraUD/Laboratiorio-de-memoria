@@ -163,12 +163,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // Verificar si hay suficientes marcos libres
             const freeFrames = frameTable.filter(frame => frame.isFree);
             if (freeFrames.length < this.pagesNeeded) {
-                // Intentar liberar páginas usando LRU
-                const freedFrames = this.applyLRUReplacement(this.pagesNeeded - freeFrames.length);
-                if (freedFrames < (this.pagesNeeded - freeFrames.length)) {
-                    alert(`No hay suficientes marcos libres para el proceso ${this.name}. Necesita ${this.pagesNeeded} páginas, solo hay ${freeFrames.length + freedFrames} disponibles.`);
-                    return false;
-                }
+                // No hay suficiente memoria disponible
+                alert(`No hay suficientes marcos libres para el proceso ${this.name}.\n` +
+                      `Necesita: ${this.pagesNeeded} páginas (${this.pagesNeeded * PAGE_SIZE} KiB)\n` +
+                      `Disponibles: ${freeFrames.length} páginas (${freeFrames.length * PAGE_SIZE} KiB)\n` +
+                      `El proceso no se ejecutará.`);
+                return false;
             }
 
             // Asignar marcos a las páginas del proceso
@@ -185,41 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             this.isRunning = true;
             return true;
-        }
-
-        applyLRUReplacement(pagesNeeded) {
-            // Encontrar las páginas menos recientemente usadas de otros procesos
-            const otherProcessFrames = frameTable.filter(frame => 
-                !frame.isFree && frame.processId !== this.id
-            );
-
-            if (otherProcessFrames.length === 0) return 0;
-
-            // Ordenar por último acceso (LRU primero)
-            otherProcessFrames.sort((a, b) => a.lastAccess - b.lastAccess);
-
-            let freedCount = 0;
-            for (let i = 0; i < Math.min(pagesNeeded, otherProcessFrames.length); i++) {
-                const frame = otherProcessFrames[i];
-                
-                // Encontrar el proceso propietario y desasignar la página
-                const ownerProcess = processes.find(p => p.id === frame.processId);
-                if (ownerProcess) {
-                    const pageEntry = ownerProcess.pageTable.get(frame.virtualPageNumber);
-                    if (pageEntry) {
-                        pageEntry.unmap();
-                        const frameIndex = ownerProcess.allocatedFrames.indexOf(frame.frameNumber);
-                        if (frameIndex > -1) {
-                            ownerProcess.allocatedFrames.splice(frameIndex, 1);
-                        }
-                    }
-                }
-                
-                frame.deallocate();
-                freedCount++;
-            }
-
-            return freedCount;
         }
 
         deallocateMemory() {
