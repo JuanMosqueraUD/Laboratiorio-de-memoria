@@ -28,16 +28,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const freeFramesEl = document.getElementById('freeFrames');
     const occupiedFramesEl = document.getElementById('occupiedFrames');
 
-    // Procesos predeterminados con tamaños en KiB
+    // Constantes de heap y stack
+    const HEAP_SIZE = 128; // 128 KiB
+    const STACK_SIZE = 64; // 64 KiB
+
+    // Procesos predeterminados con tamaños específicos para cada sección
     const predefinedProcesses = [
-        { name: "Editor de Texto", size: 256 }, // 4 páginas
-        { name: "Navegador Web", size: 512 }, // 8 páginas
-        { name: "Base de Datos", size: 768 }, // 12 páginas
-        { name: "Compilador", size: 320 }, // 5 páginas
-        { name: "Sistema Gráfico", size: 1024 }, // 16 páginas
-        { name: "Servidor Web", size: 640 }, // 10 páginas
-        { name: "Aplicación Grande", size: 1280 }, // 20 páginas
-        { name: "Sistema Masivo", size: 1920 } // 30 páginas
+        { name: "Editor de Texto", text: 50, data: 20, bss: 14 }, // Total: 84 + 192 = 276 KiB -> 6 páginas (1+1+1+2+1)
+        { name: "Navegador Web", text: 160, data: 100, bss: 60 }, // Total: 320 + 192 = 512 KiB -> 8 páginas (3+2+1+2+1)
+        { name: "Base de Datos", text: 200, data: 150, bss: 90 }, // Total: 440 + 192 = 632 KiB -> 10 páginas (4+3+2+2+1)
+        { name: "Compilador", text: 80, data: 40, bss: 8 }, // Total: 128 + 192 = 320 KiB -> 6 páginas (2+1+1+2+1)
+        { name: "Sistema Gráfico", text: 300, data: 300, bss: 212 }, // Total: 812 + 192 = 1004 KiB -> 16 páginas (5+5+4+2+1)
+        { name: "Servidor Web", text: 180, data: 140, bss: 128 }, // Total: 448 + 192 = 640 KiB -> 10 páginas (3+3+2+2+1)
+        { name: "Aplicación Grande", text: 400, data: 350, bss: 338 }, // Total: 1088 + 192 = 1280 KiB -> 20 páginas (7+6+6+2+1)
+        { name: "Sistema Masivo", text: 600, data: 500, bss: 628 } // Total: 1728 + 192 = 1920 KiB -> 30 páginas (10+8+10+2+1)
     ];
 
     // Clase Frame: representa un marco físico de memoria
@@ -48,15 +52,17 @@ document.addEventListener('DOMContentLoaded', () => {
             this.processId = null;
             this.processName = null;
             this.virtualPageNumber = null; // Número de página virtual del proceso
+            this.pageType = null; // Tipo de página: '.text', '.data', '.bss', 'heap', 'stack'
             this.lastAccess = 0; // Para el algoritmo LRU
             this.startAddress = frameNumber * PAGE_SIZE; // Dirección física de inicio
         }
 
-        allocate(processId, processName, virtualPageNumber) {
+        allocate(processId, processName, virtualPageNumber, pageType) {
             this.isFree = false;
             this.processId = processId;
             this.processName = processName;
             this.virtualPageNumber = virtualPageNumber;
+            this.pageType = pageType;
             this.lastAccess = ++accessCounter;
         }
 
@@ -65,6 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.processId = null;
             this.processName = null;
             this.virtualPageNumber = null;
+            this.pageType = null;
             this.lastAccess = 0;
         }
 
@@ -75,8 +82,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Clase PageTableEntry: entrada en la tabla de páginas
     class PageTableEntry {
-        constructor(virtualPageNumber) {
+        constructor(virtualPageNumber, pageType) {
             this.virtualPageNumber = virtualPageNumber;
+            this.pageType = pageType; // Tipo de página: '.text', '.data', '.bss', 'heap', 'stack'
             this.frameNumber = null; // Marco físico asignado
             this.present = false; // Bit de presencia
             this.referenced = false; // Bit de referencia para LRU
@@ -96,11 +104,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ProcessTemplate: representa el tipo de proceso (plantilla)
     class ProcessTemplate {
-        constructor(id, name, sizeInKiB) {
+        constructor(id, name, textSize, dataSize, bssSize) {
             this.id = id;
             this.name = name;
-            this.sizeInKiB = sizeInKiB;
-            this.pagesNeeded = Math.ceil(sizeInKiB / PAGE_SIZE); // Redondear hacia arriba
+            this.textSize = textSize;
+            this.dataSize = dataSize;
+            this.bssSize = bssSize;
+            this.heapSize = HEAP_SIZE;
+            this.stackSize = STACK_SIZE;
+            this.totalSize = textSize + dataSize + bssSize + HEAP_SIZE + STACK_SIZE;
+            // Calcular páginas necesarias sumando el ceil de cada sección
+            this.pagesNeeded = Math.ceil(textSize / PAGE_SIZE) + 
+                               Math.ceil(dataSize / PAGE_SIZE) + 
+                               Math.ceil(bssSize / PAGE_SIZE) + 
+                               Math.ceil(HEAP_SIZE / PAGE_SIZE) + 
+                               Math.ceil(STACK_SIZE / PAGE_SIZE);
             this.instances = [];
         }
 
@@ -132,15 +150,57 @@ document.addEventListener('DOMContentLoaded', () => {
             this.id = id;
             this.template = template;
             this.name = template.name;
-            this.sizeInKiB = template.sizeInKiB;
+            this.textSize = template.textSize;
+            this.dataSize = template.dataSize;
+            this.bssSize = template.bssSize;
+            this.heapSize = template.heapSize;
+            this.stackSize = template.stackSize;
+            this.totalSize = template.totalSize;
             this.pagesNeeded = template.pagesNeeded;
             this.isRunning = false;
             this.pageTable = new Map(); // Tabla de páginas: virtualPageNumber -> PageTableEntry
             this.allocatedFrames = []; // Lista de marcos asignados para liberación rápida
+            this.pageTypes = []; // Lista con el tipo de cada página en orden
             
-            // Inicializar tabla de páginas
+            // Calcular cuántas páginas necesita cada sección
+            this.calculatePageDistribution();
+            
+            // Inicializar tabla de páginas con tipos
+            this.initializePageTable();
+        }
+
+        calculatePageDistribution() {
+            // Calcular páginas necesarias para cada sección
+            this.pageTypes = []; // Limpiar el array
+            
+            // Función auxiliar para agregar páginas de un tipo
+            const addPagesForSection = (sectionSize, pageType) => {
+                if (sectionSize <= 0) return;
+                
+                // Calcular cuántas páginas completas necesita esta sección
+                const pagesForThisSection = Math.ceil(sectionSize / PAGE_SIZE);
+                
+                // Agregar las páginas necesarias
+                for (let i = 0; i < pagesForThisSection; i++) {
+                    this.pageTypes.push(pageType);
+                }
+            };
+            
+            // Asignar páginas en orden: .text -> .data -> .bss -> heap -> stack
+            addPagesForSection(this.textSize, '.text');
+            addPagesForSection(this.dataSize, '.data');
+            addPagesForSection(this.bssSize, '.bss');
+            addPagesForSection(this.heapSize, 'heap');
+            addPagesForSection(this.stackSize, 'stack');
+            
+            // Verificar que coincida con pagesNeeded
+            console.log(`Proceso ${this.name}: pageTypes.length=${this.pageTypes.length}, pagesNeeded=${this.pagesNeeded}`);
+        }
+
+        initializePageTable() {
             for (let i = 0; i < this.pagesNeeded; i++) {
-                this.pageTable.set(i, new PageTableEntry(i));
+                const pageType = this.pageTypes[i] || 'unknown';
+                this.pageTable.set(i, new PageTableEntry(i, pageType));
             }
         }
 
@@ -178,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const frame = availableFrames[i];
                 const pageEntry = this.pageTable.get(i);
                 
-                frame.allocate(this.id, this.name, i);
+                frame.allocate(this.id, this.name, i, pageEntry.pageType);
                 pageEntry.mapToFrame(frame.frameNumber);
                 this.allocatedFrames.push(frame.frameNumber);
             }
@@ -243,7 +303,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const template = new ProcessTemplate(
                 index + 1, 
                 procData.name, 
-                procData.size
+                procData.text,
+                procData.data,
+                procData.bss
             );
             processTemplates.push(template);
         });
@@ -275,6 +337,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span>${USER_PAGES}</span>
                     </div>
                     <div class="memory-detail">
+                        <span><strong>Heap por proceso:</strong></span>
+                        <span>${HEAP_SIZE} KiB</span>
+                    </div>
+                    <div class="memory-detail">
+                        <span><strong>Stack por proceso:</strong></span>
+                        <span>${STACK_SIZE} KiB</span>
+                    </div>
+                    <div class="memory-detail">
                         <span><strong>Bits dirección virtual:</strong></span>
                         <span>32 (${PAGE_NUMBER_BITS} página + ${OFFSET_BITS} offset)</span>
                     </div>
@@ -285,17 +355,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function createCustomProcess() {
         const name = processNameInput.value.trim();
-        const sizeInKiB = parseInt(processSizeInput.value);
+        const baseSize = parseInt(processSizeInput.value);
 
-        if (!name || isNaN(sizeInKiB) || sizeInKiB < PAGE_SIZE) {
-            alert(`Por favor, introduce un nombre válido y un tamaño mínimo de ${PAGE_SIZE} KiB.`);
+        if (!name || isNaN(baseSize) || baseSize <= 0) {
+            alert('Por favor, introduce un nombre válido y un tamaño base válido (en KiB).');
             return;
         }
+
+        // Distribuir el tamaño base entre las secciones (aproximadamente)
+        const textSize = Math.floor(baseSize * 0.4); // 40% para .text
+        const dataSize = Math.floor(baseSize * 0.3); // 30% para .data
+        const bssSize = baseSize - textSize - dataSize; // El resto para .bss
 
         const newTemplate = new ProcessTemplate(
             processTemplates.length + 1, 
             name, 
-            sizeInKiB
+            textSize,
+            dataSize,
+            bssSize
         );
         processTemplates.push(newTemplate);
 
@@ -350,7 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (frame.processId === 'OS') {
                     label = 'Sistema Operativo';
                 } else {
-                    label = `P${frame.processId} (Pág ${frame.virtualPageNumber})`;
+                    label = `P${frame.processId} (${frame.pageType} - Pág ${frame.virtualPageNumber})`;
                 }
             }
             
@@ -372,7 +449,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="segment-address">Marco ${frame.frameNumber}</span>
             `;
             
-            frameDiv.title = `${label}\nMarco: ${frame.frameNumber}\nTamaño: ${PAGE_SIZE} KiB\nRango: ${startHex} - ${endHex}${frame.lastAccess > 0 ? `\nÚltimo acceso: ${frame.lastAccess}` : ''}`;
+            const tooltipText = frame.processId === 'OS' 
+                ? `${label}\nMarco: ${frame.frameNumber}\nTamaño: ${PAGE_SIZE} KiB\nRango: ${startHex} - ${endHex}`
+                : `${label}\nMarco: ${frame.frameNumber}\nTamaño: ${PAGE_SIZE} KiB\nRango: ${startHex} - ${endHex}${frame.lastAccess > 0 ? `\nÚltimo acceso: ${frame.lastAccess}` : ''}`;
+            
+            frameDiv.title = tooltipText;
             
             memoryBarContainer.appendChild(frameDiv);
         });
@@ -396,9 +477,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 <div class="process-details">
-                    <div><strong>Tamaño:</strong> ${template.sizeInKiB} KiB</div>
-                    <div><strong>Páginas:</strong> ${template.pagesNeeded}</div>
-                    <div><strong>Páginas × ${PAGE_SIZE} KiB:</strong> ${template.pagesNeeded * PAGE_SIZE} KiB</div>
+                    <div><strong>.text:</strong> ${template.textSize} KiB</div>
+                    <div><strong>.data:</strong> ${template.dataSize} KiB</div>
+                    <div><strong>.bss:</strong> ${template.bssSize} KiB</div>
+                    <div><strong>Heap:</strong> ${template.heapSize} KiB</div>
+                    <div><strong>Stack:</strong> ${template.stackSize} KiB</div>
+                    <div><strong>Total:</strong> ${template.totalSize} KiB</div>
+                    <div style="grid-column: span 3"><strong>Páginas necesarias:</strong> ${template.pagesNeeded} (${template.pagesNeeded * PAGE_SIZE} KiB)</div>
                     <div style="grid-column: span 3"><strong>Instancias activas:</strong> ${runningCount}</div>
                 </div>
                 <div class="process-controls">
@@ -447,6 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
             thead.innerHTML = `
                 <tr>
                     <th rowspan="2" class="main-header">Página Virtual</th>
+                    <th rowspan="2" class="main-header">Tipo</th>
                     <th rowspan="2" class="main-header">Marco Físico</th>
                     <th colspan="2" class="main-header">Dirección Física</th>
                     <th rowspan="2" class="main-header">Presente</th>
@@ -486,6 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 row.innerHTML = `
                     <td class="dec-value">${i}</td>
+                    <td class="segment-type">${pageEntry.pageType}</td>
                     <td class="dec-value">${frameNumber}</td>
                     <td class="dec-value">${physicalAddress}</td>
                     <td class="hex-value">${physicalAddressHex}</td>
